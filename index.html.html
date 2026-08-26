@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Aviation Technical English · 背單字</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1218;
+    --panel:#161d26;
+    --panel-2:#1d2530;
+    --border:#2a3442;
+    --border-soft:#212a35;
+    --text:#e9edf3;
+    --text-dim:#8b96a5;
+    --text-faint:#5b6573;
+    --amber:#ffb020;
+    --amber-dim:#8a5c14;
+    --amber-glow:rgba(255,176,32,0.14);
+    --green:#3ddc97;
+    --green-dim:rgba(61,220,151,0.14);
+    --red:#ff6161;
+    --red-dim:rgba(255,97,97,0.14);
+    --blue:#5cc2f2;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:520px;
+    margin:0 auto;
+    padding:18px 16px 48px;
+    min-height:100vh;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  /* top placard */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--border-soft);
+    margin-bottom:18px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-dot{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
+    flex:none;
+  }
+  .brand-text h1{
+    margin:0;font-size:15px;font-weight:700;letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+  .brand-text p{
+    margin:2px 0 0;font-size:11px;color:var(--text-dim);letter-spacing:0.04em;
+  }
+  .reset-link{
+    font-size:11px;color:var(--text-faint);
+    background:none;border:none;cursor:pointer;
+    text-decoration:underline;padding:4px;
+    font-family:inherit;
+  }
+
+  /* overall status strip */
+  .status-strip{
+    display:grid;grid-template-columns:1fr 1fr 1fr;
+    gap:1px;background:var(--border-soft);
+    border:1px solid var(--border-soft);
+    border-radius:10px;overflow:hidden;
+    margin-bottom:20px;
+  }
+  .status-cell{
+    background:var(--panel);
+    padding:10px 8px;text-align:center;
+  }
+  .status-cell .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:20px;font-weight:700;color:var(--amber);
+    line-height:1.1;
+  }
+  .status-cell .lbl{
+    font-size:10px;color:var(--text-dim);
+    margin-top:3px;letter-spacing:0.03em;
+  }
+  .status-cell.green .num{color:var(--green);}
+  .status-cell.blue .num{color:var(--blue);}
+
+  .fuelbar-outer{
+    height:6px;border-radius:4px;background:var(--panel-2);
+    border:1px solid var(--border-soft);overflow:hidden;margin-bottom:26px;
+  }
+  .fuelbar-inner{
+    height:100%;background:linear-gradient(90deg,var(--amber),var(--green));
+    border-radius:4px;transition:width .5s ease;
+  }
+
+  h2.section-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--text-dim);margin:0 0 12px;
+  }
+
+  /* week cards */
+  .week-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;}
+  .week-card{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:12px;padding:14px;cursor:pointer;
+    transition:border-color .15s ease, transform .1s ease;
+    text-align:left;color:inherit;
+  }
+  .week-card:active{transform:scale(0.98);}
+  .week-card:hover{border-color:var(--amber-dim);}
+  .week-card .wk-label{
+    font-family:'Space Grotesk',sans-serif;font-size:12px;
+    letter-spacing:0.08em;color:var(--text-dim);text-transform:uppercase;
+  }
+  .week-card .wk-range{
+    font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;
+    margin:4px 0 10px;color:var(--text);
+  }
+  .week-progress-track{
+    height:5px;border-radius:3px;background:var(--panel-2);
+    border:1px solid var(--border-soft);overflow:hidden;margin-bottom:6px;
+  }
+  .week-progress-fill{height:100%;background:var(--green);border-radius:3px;}
+  .week-card .wk-stat{font-size:11px;color:var(--text-dim);}
+  .week-card .wk-stat b{color:var(--text);font-weight:600;}
+  .week-card.done{border-color:var(--green-dim);}
+  .week-card.done .wk-range{color:var(--green);}
+
+  /* quiz screen */
+  .quiz-topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;gap:8px;
+  }
+  .quiz-topbar-left{display:flex;gap:8px;}
+  .save-btn{color:var(--amber);border-color:var(--amber-dim);white-space:nowrap;}
+  .back-btn{
+    background:none;border:1px solid var(--border);color:var(--text-dim);
+    border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .back-btn:active{transform:scale(0.96);}
+  .quiz-progress-text{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);
+  }
+  .quiz-progress-track{
+    height:4px;border-radius:3px;background:var(--panel-2);
+    overflow:hidden;margin-bottom:20px;
+  }
+  .quiz-progress-fill{height:100%;background:var(--amber);border-radius:3px;transition:width .3s ease;}
+
+  .card-panel{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:16px;padding:24px 20px;text-align:center;
+  }
+  .pos-chip{
+    display:inline-block;background:var(--amber-glow);color:var(--amber);
+    border:1px solid var(--amber-dim);border-radius:20px;
+    padding:4px 14px;font-size:12px;font-weight:600;letter-spacing:0.03em;
+    margin-bottom:16px;
+  }
+  .meaning{
+    font-size:24px;font-weight:600;line-height:1.4;margin:0 0 6px;
+  }
+  .letter-count{
+    font-size:11px;color:var(--text-faint);margin-bottom:22px;
+    font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;
+  }
+  .hint-row{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    gap:3px;margin-bottom:22px;min-height:34px;align-items:flex-end;
+  }
+  .ltr-box{
+    width:22px;height:30px;border-bottom:2px solid var(--amber-dim);
+    display:inline-flex;align-items:flex-end;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;
+    color:var(--amber);padding-bottom:3px;
+  }
+  .sep-space{width:12px;}
+  .sep-hyphen{
+    align-self:flex-end;color:var(--text-faint);font-size:18px;
+    padding-bottom:6px;font-family:'JetBrains Mono',monospace;
+  }
+
+  .answer-input{
+    width:100%;background:var(--panel-2);border:1.5px solid var(--border);
+    border-radius:10px;color:var(--text);font-size:18px;
+    padding:12px 14px;text-align:center;font-family:'JetBrains Mono',monospace;
+    text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px;
+    outline:none;
+  }
+  .answer-input:focus{border-color:var(--amber);}
+  .answer-input.correct{border-color:var(--green);color:var(--green);}
+  .answer-input.wrong{border-color:var(--red);color:var(--red);}
+
+  .err-msg{
+    font-size:12px;color:var(--red);margin:-4px 0 12px;min-height:16px;
+  }
+
+  .feedback-msg{
+    font-size:13px;margin:-2px 0 14px;min-height:18px;font-weight:600;
+  }
+  .feedback-msg.ok{color:var(--green);}
+  .feedback-msg.no{color:var(--red);}
+
+  .btn-primary{
+    width:100%;background:var(--amber);color:#241503;border:none;
+    border-radius:10px;padding:13px;font-size:15px;font-weight:700;
+    cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:0.02em;
+  }
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-secondary{
+    width:100%;background:none;color:var(--text-dim);border:1px solid var(--border);
+    border-radius:10px;padding:12px;font-size:14px;cursor:pointer;
+    font-family:'Inter',sans-serif;margin-top:10px;
+  }
+
+  /* summary screen */
+  .summary-panel{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:16px;padding:32px 20px;text-align:center;
+  }
+  .summary-panel .big-num{
+    font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;
+    color:var(--green);margin:6px 0;
+  }
+  .summary-panel .sub{color:var(--text-dim);font-size:13px;margin-bottom:24px;}
+  .summary-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px;}
+  .summary-stats div{background:var(--panel-2);border-radius:10px;padding:12px;}
+  .summary-stats .n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
+  .summary-stats .l{font-size:11px;color:var(--text-dim);margin-top:3px;}
+
+  /* loading */
+  .loading-screen{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:70vh;color:var(--text-dim);font-size:13px;gap:10px;
+  }
+  .spinner{
+    width:22px;height:22px;border-radius:50%;
+    border:2.5px solid var(--border);border-top-color:var(--amber);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* confirm modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;padding:20px;
+  }
+  .modal-box{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:14px;padding:20px;max-width:320px;width:100%;
+  }
+  .modal-box p{font-size:14px;color:var(--text);margin:0 0 18px;line-height:1.5;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions button{
+    flex:1;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .modal-actions .cancel{background:none;border:1px solid var(--border);color:var(--text-dim);}
+  .modal-actions .confirm{background:var(--red);border:none;color:#2a0a0a;font-weight:700;}
+
+  .hidden{display:none !important;}
+  .empty-note{font-size:12px;color:var(--text-faint);text-align:center;padding:20px 0;}
+
+  .storage-status{
+    font-size:11.5px;padding:9px 12px;border-radius:8px;margin-bottom:16px;
+    border:1px solid var(--border-soft);color:var(--text-dim);background:var(--panel);
+    line-height:1.5;
+  }
+  .storage-status.ok{color:var(--green);border-color:rgba(61,220,151,0.3);}
+  .storage-status.warn{color:var(--amber);border-color:rgba(255,176,32,0.35);}
+  .storage-status.bad{color:var(--red);border-color:rgba(255,97,97,0.35);}
+
+  .backup-row{display:flex;gap:10px;margin-bottom:8px;}
+  .backup-btn{margin-top:0;font-size:12.5px;padding:11px 8px;}
+  .backup-note{font-size:11px;color:var(--text-faint);line-height:1.5;padding-bottom:6px;}
+
+  .save-note{font-size:11px;min-height:14px;margin:-8px 0 12px;color:var(--text-faint);}
+  .save-note.ok{color:var(--green);}
+  .save-note.bad{color:var(--red);}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--panel);border:1px solid var(--border);
+    padding:11px 18px;border-radius:10px;font-size:13px;
+    z-index:100;box-shadow:0 6px 24px rgba(0,0,0,0.5);
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+    max-width:85%;text-align:center;
+  }
+  .toast.show{opacity:1;}
+  .toast.ok{color:var(--green);border-color:rgba(61,220,151,0.4);}
+  .toast.bad{color:var(--red);border-color:rgba(255,97,97,0.4);}
+
+  @media (max-width:360px){
+    .week-grid{gap:10px;}
+    .meaning{font-size:21px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <div>系統啟動中…</div>
+  </div>
+
+  <div id="mainContent" class="hidden">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-text">
+          <h1>Aviation Technical English</h1>
+          <p>Level 1 · 詞彙訓練系統</p>
+        </div>
+      </div>
+      <button class="reset-link" id="resetBtn">重設進度</button>
+    </div>
+
+    <!-- HOME SCREEN -->
+    <div id="homeScreen">
+      <div class="storage-status" id="storageStatus">檢查儲存狀態中…</div>
+
+      <div class="status-strip">
+        <div class="status-cell">
+          <div class="num mono" id="statMastered">0</div>
+          <div class="lbl">已熟記</div>
+        </div>
+        <div class="status-cell green">
+          <div class="num mono" id="statTotal">0</div>
+          <div class="lbl">單字總數</div>
+        </div>
+        <div class="status-cell blue">
+          <div class="num mono" id="statDays">0</div>
+          <div class="lbl">累積練習天數</div>
+        </div>
+      </div>
+      <div class="fuelbar-outer"><div class="fuelbar-inner" id="overallFill" style="width:0%"></div></div>
+
+      <h2 class="section-title">選擇週次</h2>
+      <div class="week-grid" id="weekGrid"></div>
+
+      <h2 class="section-title" style="margin-top:24px;">備份與還原</h2>
+      <div class="backup-row">
+        <button class="btn-secondary backup-btn" id="exportBtn">📤 匯出進度備份</button>
+        <button class="btn-secondary backup-btn" id="importBtn">📥 匯入進度備份</button>
+        <input type="file" id="importFile" accept="application/json" class="hidden">
+      </div>
+      <div class="backup-note">建議每次練習完都匯出一份存起來，避免因裝置或瀏覽器限制而遺失進度。匯入時會用備份檔完全覆蓋目前的進度。</div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quizScreen" class="hidden">
+      <div class="quiz-topbar">
+        <div class="quiz-topbar-left">
+          <button class="back-btn" id="quizBackBtn">← 返回</button>
+          <button class="back-btn save-btn" id="manualSaveBtn">💾 立即儲存</button>
+        </div>
+        <div class="quiz-progress-text" id="quizProgressText">0 / 0</div>
+      </div>
+      <div class="quiz-progress-track"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%"></div></div>
+
+      <div class="card-panel">
+        <div class="pos-chip" id="posChip">n</div>
+        <div class="meaning" id="meaningText">—</div>
+        <div class="letter-count" id="letterCount">0 個字母</div>
+        <div class="hint-row" id="hintRow"></div>
+
+        <input class="answer-input" id="answerInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="輸入英文單字">
+        <div class="err-msg" id="errMsg"></div>
+        <div class="feedback-msg" id="feedbackMsg"></div>
+        <div class="save-note" id="saveNote"></div>
+
+        <button class="btn-primary" id="actionBtn">檢查答案</button>
+      </div>
+    </div>
+
+    <!-- SUMMARY SCREEN -->
+    <div id="summaryScreen" class="hidden">
+      <div class="summary-panel">
+        <div class="sub">本次練習完成</div>
+        <div class="big-num" id="summaryAccuracy">0%</div>
+        <div class="sub">答對率</div>
+        <div class="summary-stats">
+          <div><div class="n mono" id="summaryCorrect">0</div><div class="l">答對題數</div></div>
+          <div><div class="n mono" id="summaryNewMastered">0</div><div class="l">新增熟記</div></div>
+        </div>
+        <button class="btn-primary" id="summaryHomeBtn">返回首頁</button>
+        <button class="btn-secondary" id="summaryAgainBtn">再練一次</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay hidden" id="resetModal">
+    <div class="modal-box">
+      <p>確定要重設所有學習進度嗎？此動作無法復原，603 個單字的熟記紀錄與練習天數都會被清除。</p>
+      <div class="modal-actions">
+        <button class="cancel" id="resetCancelBtn">取消</button>
+        <button class="confirm" id="resetConfirmBtn">確定重設</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const VOCAB = [{"s":1,"w":"ABNORMAL","p":"adj","c":"異常的"},{"s":2,"w":"ABRASIVE","p":"adj","c":"有磨蝕作用的"},{"s":3,"w":"ABSORB","p":"v","c":"吸收"},{"s":4,"w":"ACCEPT","p":"v","c":"接受;答應"},{"s":5,"w":"ACCEPTABLE","p":"adj","c":"可接受的"},{"s":6,"w":"ACCESS","p":"n","c":"通道,入口"},{"s":7,"w":"ACCESSIBLE","p":"adj","c":"可接近的"},{"s":8,"w":"ACCIDENT","p":"n","c":"事故;災"},{"s":9,"w":"ACCIDENTAL","p":"adj","c":"偶然的，意外的"},{"s":10,"w":"ACCUMULATOR","p":"n","c":"儲壓器"},{"s":11,"w":"ACCURATE","p":"adj","c":"準確的;精確的"},{"s":12,"w":"ACME","p":"n","c":"最高點;頂點"},{"s":13,"w":"ACOUSTIC","p":"adj","c":"聽覺的"},{"s":14,"w":"ACTUATOR","p":"n","c":"[機]制動器"},{"s":15,"w":"ADHESIVE","p":"n","c":"膠黏劑"},{"s":16,"w":"ADJACENT","p":"adj","c":"毗連的,鄰接"},{"s":17,"w":"ADJUST","p":"v","c":"調節;改變...以適應"},{"s":18,"w":"AGENT","p":"n","c":"【化】劑"},{"s":19,"w":"AGREE","p":"v","c":"相符"},{"s":20,"w":"AID","p":"n","c":"幫助,救助"},{"s":21,"w":"AILERON","p":"n","c":"副翼"},{"s":22,"w":"AIRBORNE","p":"adj","c":"空運的"},{"s":23,"w":"AIRLOAD","p":"n","c":"空載"},{"s":24,"w":"ALIGN","p":"v","c":"排成直線"},{"s":25,"w":"ALTERNATE","p":"adj","c":"替代的"},{"s":26,"w":"ALTERNATIVE","p":"n","c":"替代品，替代方案"},{"s":27,"w":"AMASS","p":"v","c":"聚集"},{"s":28,"w":"ANALOG","p":"adj","c":"類比的"},{"s":29,"w":"ANGULAR","p":"adj","c":"有角度的"},{"s":30,"w":"ANTIMICROBIAL","p":"adj","c":"防微生物的"},{"s":31,"w":"APPARENT","p":"adj","c":"顯而易見的"},{"s":32,"w":"APPLICABLE","p":"adj","c":"可應用的,適用的"},{"s":33,"w":"APPROVAL","p":"n","c":"批准;認可"},{"s":34,"w":"APPROXIMATE","p":"adj","c":"近似的,接近的"},{"s":35,"w":"ARCING","p":"v","c":"電弧"},{"s":36,"w":"ARM","p":"v","c":"為自動執行準備"},{"s":37,"w":"ARROW","p":"n","c":"箭，標示"},{"s":38,"w":"ASSEMBLE","p":"v","c":"配裝,組裝"},{"s":39,"w":"ASSEMBLY","p":"n","c":"組件，套件"},{"s":40,"w":"AUTHORITY","p":"n","c":"主管機關"},{"s":41,"w":"AUTOMATICALLY","p":"adv","c":"自動地"},{"s":42,"w":"AUXILIARY","p":"adj","c":"輔助的"},{"s":43,"w":"AVAILABLE","p":"adj","c":"可利用的"},{"s":44,"w":"AXE","p":"n","c":"斧;斧形錘"},{"s":45,"w":"AXIAL","p":"adj","c":"軸向的"},{"s":46,"w":"BALANCE","p":"v","c":"使平衡;保持…的平衡"},{"s":47,"w":"BAND","p":"n","c":"傳送帶"},{"s":48,"w":"BARE","p":"adj","c":"裸的"},{"s":49,"w":"BARREL","p":"n","c":"活塞筒"},{"s":50,"w":"BASIC","p":"adj","c":"基礎的,基本的"},{"s":51,"w":"BAYONET","p":"n","c":"刺刀;卡栓"},{"s":52,"w":"BEACON","p":"n","c":"燈塔; 信號浮標; 燈標;標誌;警告"},{"s":53,"w":"BEAD","p":"n","c":"滴"},{"s":54,"w":"BELLY","p":"n","c":"腹部"},{"s":55,"w":"BEND","p":"n","c":"彎曲"},{"s":56,"w":"BLEED","p":"v","c":"放氣"},{"s":57,"w":"BLOCKAGE","p":"n","c":"封鎖;妨礙"},{"s":58,"w":"BOGIE","p":"n","c":"轉向架"},{"s":59,"w":"BOND","p":"n","c":"膠合;接合"},{"s":60,"w":"BONDING JUMPER","p":"n","c":"搭接線"},{"s":61,"w":"BOTTOM","p":"adj","c":"最低的;最下的"},{"s":62,"w":"BRACE","p":"n","c":"支柱"},{"s":63,"w":"BRACKET","p":"n","c":"托架,撐架"},{"s":64,"w":"BRAND","p":"n","c":"商標"},{"s":65,"w":"BREAK","p":"v","c":"打破;折斷"},{"s":66,"w":"BREATHE","p":"v","c":"呼吸"},{"s":67,"w":"BRIGHTNESS","p":"n","c":"亮度"},{"s":68,"w":"BRONZE","p":"n","c":"青銅"},{"s":69,"w":"BUBBLE","p":"n","c":"水泡,氣泡"},{"s":70,"w":"BULB","p":"n","c":"球莖;球狀物;電燈泡"},{"s":71,"w":"BULK","p":"adj","c":"大量的;大批的;散裝的;容積;體積"},{"s":72,"w":"BULKHEAD","p":"n","c":"艙壁;隔板;隔牆"},{"s":73,"w":"BULLNOSE","p":"n","c":"外圓角"},{"s":74,"w":"BYPASS","p":"v","c":"繞過;加設旁道(旁管)"},{"s":75,"w":"CABINET","p":"?","c":"櫥櫃"},{"s":76,"w":"CALCULATE","p":"v","c":"計算"},{"s":77,"w":"CALIBRATE","p":"v","c":"校驗"},{"s":78,"w":"CALIPER","p":"n","c":"(常用複數)卡鉗；卡尺"},{"s":79,"w":"CALIPER-VERNIER","p":"n","c":"游標卡呎"},{"s":80,"w":"CAMBER","p":"n","c":"弧形；曲弧度"},{"s":81,"w":"CANCEL","p":"v","c":"取消,廢除;中止"},{"s":82,"w":"CARDAN","p":"adj","c":"萬向式的"},{"s":83,"w":"CAREFUL","p":"adj","c":"周到的;精心的"},{"s":84,"w":"CARRIAGE","p":"n","c":"[機]滑動臺架"},{"s":85,"w":"CATALOG","p":"n","c":"目錄"},{"s":86,"w":"CATCH","p":"v","c":"接住,抓住"},{"s":87,"w":"CHEMICAL","p":"adj","c":"化學的,化學上的"},{"s":88,"w":"CHORDWISE","p":"adj","c":"翼弦方向的"},{"s":89,"w":"CHROMATE","p":"n","c":"鉻酸鹽"},{"s":90,"w":"CHUNK","p":"n","c":"大塊;相當大的部分(或數量)"},{"s":91,"w":"CIRCUIT","p":"n","c":"電路;回路"},{"s":92,"w":"CLARITY","p":"n","c":"清楚；明晰"},{"s":93,"w":"CLEARANCE","p":"n","c":"空隙;間隙"},{"s":94,"w":"CLICK","p":"n","c":"卡嗒聲,喀嚓聲"},{"s":95,"w":"CLOCKWISE","p":"adv","c":"順時針方向地;右旋地"},{"s":96,"w":"CLOGGED","p":"vt","c":"阻塞"},{"s":97,"w":"CLOSET","p":"n","c":"壁櫥"},{"s":98,"w":"COLLECT","p":"v","c":"收集,採集;使集合"},{"s":99,"w":"COLUMN","p":"n","c":"圓柱;圓柱狀物"},{"s":100,"w":"COMBI","p":"n","c":"客貨艙"},{"s":101,"w":"COMPARE","p":"v","c":"比較,對照"},{"s":102,"w":"COMPARTMENT","p":"n","c":"區劃;劃分;隔間"},{"s":103,"w":"COMPLETE","p":"v","c":"完成;結束"},{"s":104,"w":"COMPONENT","p":"n","c":"構成要素;零件"},{"s":105,"w":"COMPOUND","p":"n","c":"混合物;化合物"},{"s":106,"w":"COMPRESS","p":"v","c":"壓緊,壓縮"},{"s":107,"w":"CONDENSATION","p":"n","c":"凝結"},{"s":108,"w":"CONNECT","p":"v","c":"連接,連結"},{"s":109,"w":"CONSTANT","p":"adj","c":"固定的,不變的"},{"s":110,"w":"CONTAIN","p":"v","c":"包含;容納"},{"s":111,"w":"CONTAINER","p":"n","c":"容器"},{"s":112,"w":"CONTAINERIZE","p":"v","c":"將(貨物)裝入貨櫃; 以貨櫃運送(貨物)"},{"s":113,"w":"CONTAMINATION","p":"n","c":"污染,弄髒"},{"s":114,"w":"CONTENT","p":"n","c":"內容,含量"},{"s":115,"w":"CONTINUOUS","p":"adj","c":"連續的,不斷的"},{"s":116,"w":"CONTOUR","p":"n","c":"輪廓;輪廓線"},{"s":117,"w":"CORRECTION","p":"n","c":"訂正,修改;校正"},{"s":118,"w":"COTTON","p":"n","c":"棉, 棉花"},{"s":119,"w":"COUNTER-CLOCKWISE","p":"adv","c":"逆時針方向地"},{"s":120,"w":"COUPLER","p":"n","c":"聯結器 ；耦合器"},{"s":121,"w":"COWLING","p":"n","c":"整流罩"},{"s":122,"w":"CRADLE","p":"n","c":"支撐架"},{"s":123,"w":"CRASH","p":"v","c":"碰撞, 墜落"},{"s":124,"w":"CURVE","p":"n","c":"曲線;弧線"},{"s":125,"w":"CUTBACK","p":"n","c":"減少"},{"s":126,"w":"CYLINDER","p":"n","c":"汽缸;圓筒"},{"s":127,"w":"DAMAGE","p":"v","c":"損害;損失"},{"s":128,"w":"DAMPER","p":"n","c":"阻尼器"},{"s":129,"w":"DANGEROUS","p":"adj","c":"危險的;不安全的"},{"s":130,"w":"DEACTIVATION","p":"n","c":"無法作動"},{"s":131,"w":"DEAD WEIGHT","p":"n","c":"(物體的)配重塊"},{"s":132,"w":"DECAL","p":"n","c":"印花樣"},{"s":133,"w":"DECK","p":"n","c":"甲板"},{"s":134,"w":"DECOMPRESSION","p":"n","c":"減壓"},{"s":135,"w":"DECREASE","p":"v","c":"減少;降低"},{"s":136,"w":"DEENERGIZE","p":"v","c":"使 ..斷電"},{"s":137,"w":"DEFECTIVE","p":"adj","c":"有缺陷的;故障的"},{"s":138,"w":"DEGRADED","p":"adj","c":"降級的;墮落的"},{"s":139,"w":"DEODORANT","p":"n","c":"防臭劑"},{"s":140,"w":"DEPRESSURIZATION","p":"n","c":"洩壓;釋壓"},{"s":141,"w":"DERMATITIS","p":"n","c":"皮膚炎"},{"s":142,"w":"DESIGNATION","p":"n","c":"指定.任命"},{"s":143,"w":"DETENT","p":"n","c":"(機械上的)止動裝置；棘爪"},{"s":144,"w":"DETERIORATION","p":"n","c":"惡化"},{"s":145,"w":"DEVICE","p":"n","c":"裝置、圖案、設計"},{"s":146,"w":"DEW","p":"v","c":"結露水,(凝結成露水)"},{"s":147,"w":"DIAGONALLY","p":"adv","c":"斜對地;對角地"},{"s":148,"w":"DIAPER","p":"n","c":"尿布"},{"s":149,"w":"DIFFERENCE","p":"n","c":"差別,差異"},{"s":150,"w":"DIGITAL","p":"adj","c":"數位的"},{"s":151,"w":"DIM","p":"adj./v","c":"變暗的;漸轉暗"},{"s":152,"w":"DIPSTICK","p":"n","c":"量油尺"},{"s":153,"w":"DIRTY","p":"adj","c":"髒的"},{"s":154,"w":"DISARM","p":"v","c":"解除自動運轉"},{"s":155,"w":"DISASSEMBLE","p":"v","c":"拆開,拆卸"},{"s":156,"w":"DISCARD","p":"v","c":"丟棄"},{"s":157,"w":"DISCOLORATION","p":"n","c":"變色"},{"s":158,"w":"DISCONNECT","p":"v","c":"分開;切斷"},{"s":159,"w":"DISCRETION","p":"n","c":"判斷"},{"s":160,"w":"DISENGAGE","p":"v","c":"脫離,分離"},{"s":161,"w":"DISPLAY","p":"n","c":"顯示,表現"},{"s":162,"w":"DISPOSITION","p":"n","c":"處置;配置"},{"s":163,"w":"DISSIPATIVE","p":"adj","c":"消除"},{"s":164,"w":"DISTANCE","p":"n","c":"距離;路程"},{"s":165,"w":"DISTILLED","p":"adj","c":"蒸餾的"},{"s":166,"w":"DIVIDE","p":"v","c":"分開"},{"s":167,"w":"DONGLE","p":"n","c":"防止未經准許擅自使用軟體程式的安全"},{"s":168,"w":"DOWNLOCK","p":"n","c":"下位鎖"},{"s":169,"w":"DOWNSTREAM","p":"adj","c":"順流的;下游的"},{"s":170,"w":"DRAIN","p":"v","c":"排出;使流出"},{"s":171,"w":"DRAINAGE","p":"n","c":"排水口"},{"s":172,"w":"DRIPPING","p":"n","c":"滴"},{"s":173,"w":"DROPLET","p":"n","c":"液滴"},{"s":174,"w":"DUST","p":"n","c":"灰塵, 塵土"},{"s":175,"w":"ECCENTRIC","p":"adj","c":"(兩圓)不同心的"},{"s":176,"w":"ECONOMIC","p":"adj","c":"經濟的"},{"s":177,"w":"EFFECT","p":"n","c":"效果;效力;影響"},{"s":178,"w":"EFFECTIVENESS","p":"n","c":"有效; 有力"},{"s":179,"w":"EJECT","p":"v","c":"噴射;吐出"},{"s":180,"w":"ELECTRICAL","p":"adj","c":"電的;用電的"},{"s":181,"w":"ELECTRONIC","p":"adj","c":"電子的"},{"s":182,"w":"ELEMENT","p":"n","c":"成分、要素、分子"},{"s":183,"w":"EMERGENCY","p":"n","c":"緊急情況;突然事件"},{"s":184,"w":"EMPENNAGE","p":"n","c":"機尾; 尾翼面; 尾翼"},{"s":185,"w":"ENERGIZE","p":"v","c":"使..通電激磁"},{"s":186,"w":"ENGAGE","p":"v","c":"嚙合,接合"},{"s":187,"w":"ENTRANCE","p":"n","c":"入口;門口"},{"s":188,"w":"EPOXY","p":"adj","c":"環氧(化物)的"},{"s":189,"w":"EQUAL","p":"adj","c":"相等的;相當的"},{"s":190,"w":"EQUIPMENT","p":"n","c":"儀器,設備"},{"s":191,"w":"EQUIVALENT","p":"adj","c":"相等的;等效的"},{"s":192,"w":"EROSION","p":"n","c":"侵蝕.腐蝕"},{"s":193,"w":"ERROR","p":"n","c":"錯誤;失誤"},{"s":194,"w":"ESCAPE","p":"v","c":"逃出"},{"s":195,"w":"ESTIMATE","p":"v","c":"估計"},{"s":196,"w":"EVAPORATION","p":"n","c":"蒸發;發散"},{"s":197,"w":"EXAMINE","p":"v","c":"檢查;細查"},{"s":198,"w":"EXCEED","p":"v","c":"超過;超出"},{"s":199,"w":"EXCEPT","p":"prep","c":"除外"},{"s":200,"w":"EXCESSIVE","p":"adj","c":"過度的"},{"s":201,"w":"EXHAUST","p":"n","c":"排氣"},{"s":202,"w":"EXIST","p":"v","c":"存在"},{"s":203,"w":"EXIT","p":"n","c":"出口;通道"},{"s":204,"w":"EXPAND","p":"v","c":"展開,張開"},{"s":205,"w":"EXPENDABLE","p":"adj","c":"可消耗的；消耗品"},{"s":206,"w":"EXPERIENCED","p":"adj","c":"富有經驗的"},{"s":207,"w":"EXPIRATION","p":"n","c":"終結;期滿"},{"s":208,"w":"EXPIRE","p":"v","c":"(期限)屆期"},{"s":209,"w":"EXPIRY","p":"n","c":"終結;終止"},{"s":210,"w":"EXPLANATORY","p":"adj","c":"解釋的"},{"s":211,"w":"EXPLOSING-PROOF","p":"adj","c":"防爆的"},{"s":212,"w":"EXPLOSION","p":"n","c":"爆炸"},{"s":213,"w":"EXPLOSIVE","p":"adj","c":"爆炸(性)的"},{"s":214,"w":"EXTEND","p":"v","c":"延長,延伸"},{"s":215,"w":"EXTERNAL","p":"adj","c":"外面的;外部的"},{"s":216,"w":"EXTINGUISH","p":"v","c":"熄滅"},{"s":217,"w":"EXTRUDE","p":"v","c":"凸出，伸出"},{"s":218,"w":"FAIL-SAFE","p":"n","c":"安全裝置"},{"s":219,"w":"FAIRLEAD","p":"n","c":"導纜孔"},{"s":220,"w":"FAMILIAR","p":"adj","c":"熟悉的"},{"s":221,"w":"FAN COWL","p":"n","c":"風扇罩"},{"s":222,"w":"FAYING","p":"adj","c":"接合的"},{"s":223,"w":"FERRY","p":"v","c":"運送"},{"s":224,"w":"FIBER","p":"n","c":"纖維"},{"s":225,"w":"FILLET","p":"n","c":"束線帶"},{"s":226,"w":"FILTERED","p":"adj","c":"已過濾的"},{"s":227,"w":"FIN","p":"n","c":"(飛機的)安定翼"},{"s":228,"w":"FITTING","p":"n","c":"配件"},{"s":229,"w":"FLAME","p":"n","c":"火焰"},{"s":230,"w":"FLAMMABLE","p":"adj","c":"易燃的;可燃的"},{"s":231,"w":"FLANGE","p":"n","c":"凸緣"},{"s":232,"w":"FLASH","p":"v","c":"閃現"},{"s":233,"w":"FLEET","p":"n","c":"機隊"},{"s":234,"w":"FLOW CHART","p":"n","c":"流程圖"},{"s":235,"w":"FLUORESCENT","p":"adj","c":"螢光的、發亮的"},{"s":236,"w":"FLUSH","p":"v","c":"用水沖洗"},{"s":237,"w":"FOLLOW","p":"v","c":"跟隨"},{"s":238,"w":"FOREFLAP","p":"n","c":"前襟翼"},{"s":239,"w":"FORK","p":"n","c":"分歧, 分叉"},{"s":240,"w":"FORMALDEHYDE","p":"n","c":"甲醛"},{"s":241,"w":"FORWARD","p":"adj","c":"向前"},{"s":242,"w":"FRAME","p":"n","c":"結構"},{"s":243,"w":"FREEDOM","p":"n","c":"自由；獨立自主"},{"s":244,"w":"FREELY","p":"adv","c":"自由地,無拘束地"},{"s":245,"w":"FREEZE","p":"v","c":"結冰,凝固"},{"s":246,"w":"FREIGHTER","p":"n","c":"貨輪；運輸飛機"},{"s":247,"w":"FREQUENT","p":"adj","c":"時常發生的,頻繁的"},{"s":248,"w":"FRET","p":"n","c":"侵蝕；腐蝕；磨損；蛀蝕"},{"s":249,"w":"FULLY","p":"adv","c":"完全地；徹底地"},{"s":250,"w":"FUNCTION","p":"n","c":"功能,作用"},{"s":251,"w":"FUSE","p":"n","c":"電阻式保險絲"},{"s":252,"w":"FUSE BOLT","p":"n","c":"保險螺桿"},{"s":253,"w":"FUSELAGE","p":"n","c":"【空】機身"},{"s":254,"w":"FUZZ","p":"n","c":"細毛；絨毛"},{"s":255,"w":"GALLON","p":"n","c":"加侖"},{"s":256,"w":"GASKET","p":"n","c":"襯墊"},{"s":257,"w":"GAUGE","p":"n","c":"標準尺寸, 標準規格"},{"s":258,"w":"GAUZE","p":"n","c":"網紗;薄紗;紗布"},{"s":259,"w":"GENERAL","p":"adj","c":"一般的"},{"s":260,"w":"GENERATOR","p":"n","c":"發電機;產生器"},{"s":261,"w":"GENEVA CAM","p":"n","c":"星形凸輪"},{"s":262,"w":"GIMBALS","p":"n","c":"萬向座/接頭"},{"s":263,"w":"GLOSSY","p":"adj","c":"光滑的;有光澤的"},{"s":264,"w":"GLOVE","p":"n","c":"手套"},{"s":265,"w":"GRILLE","p":"n","c":"柵欄"},{"s":266,"w":"GRIME","p":"n","c":"塵垢, 污點,"},{"s":267,"w":"GROOVE","p":"n","c":"溝;槽"},{"s":268,"w":"GROUND","p":"v","c":"接地"},{"s":269,"w":"HALF","p":"n","c":"一半"},{"s":270,"w":"HANG","p":"v","c":"懸掛,吊著"},{"s":271,"w":"HATCH","p":"n","c":"艙口"},{"s":272,"w":"HEADSET","p":"n","c":"頭戴式收話器; 雙耳式耳機"},{"s":273,"w":"HELMET","p":"n","c":"安全帽"},{"s":274,"w":"HIDDEN","p":"adj","c":"隱藏的;隱祕的"},{"s":275,"w":"HINGE","p":"n","c":"鉸鏈"},{"s":276,"w":"HOIST","p":"v","c":"吊起"},{"s":277,"w":"HOOD","p":"n","c":"蓋子"},{"s":278,"w":"HORIZONTAL","p":"adj","c":"水平的;橫的"},{"s":279,"w":"HYDRAULIC","p":"adj","c":"水壓的,液壓的"},{"s":280,"w":"HYDROCARBON","p":"n","c":"碳氫化合物"},{"s":281,"w":"HYDROSTATIC","p":"adj","c":"流體靜力學的"},{"s":282,"w":"IDENTIFICATION","p":"n","c":"認出;識別"},{"s":283,"w":"IDLER","p":"n","c":"導輪"},{"s":284,"w":"IGNITION","p":"n","c":"著火;點火"},{"s":285,"w":"ILLUMINATE","p":"v","c":"照亮;照射"},{"s":286,"w":"ILLUSTRATED","p":"adj","c":"圖示"},{"s":287,"w":"IMMEDIATELY","p":"adv","c":"直接地;立即"},{"s":288,"w":"INBOARD","p":"adj","c":"內側的"},{"s":289,"w":"INCLUDE","p":"v","c":"包括,包含"},{"s":290,"w":"INCORRECT","p":"adj","c":"不正確的;錯誤的"},{"s":291,"w":"INCREASE","p":"v","c":"增大;增加"},{"s":292,"w":"INDEPENDENTLY","p":"adv","c":"獨立地"},{"s":293,"w":"INDICATION","p":"n","c":"指示"},{"s":294,"w":"INFLATE","p":"v","c":"使充氣;使膨脹"},{"s":295,"w":"INHIBITOR","p":"n","c":"抗化劑"},{"s":296,"w":"INJURY","p":"n","c":"傷害;損害"},{"s":297,"w":"INSPECTION","p":"n","c":"檢查,檢驗"},{"s":298,"w":"INSTALL","p":"v","c":"安裝,設置"},{"s":299,"w":"INSTRUMENT","p":"n","c":"儀器;器具,器械"},{"s":300,"w":"INSULATION","p":"n","c":"隔離墊"},{"s":301,"w":"INTENSITY","p":"n","c":"強度"},{"s":302,"w":"INTERCHANGE","p":"v","c":"交換位置;交替發生"},{"s":303,"w":"INTERFACE","p":"n","c":"界面,分界面"},{"s":304,"w":"INTERMITTENT","p":"adj","c":"間歇的;週期性的"},{"s":305,"w":"INTERNAL","p":"adj","c":"內的,內部的"},{"s":306,"w":"INTERVAL","p":"n","c":"間隔;距離"},{"s":307,"w":"IRREGULAR","p":"adj","c":"不規則的,無規律的"},{"s":308,"w":"IRRITATION","p":"n","c":"刺激;過敏;疼痛"},{"s":309,"w":"ISOLATE","p":"v","c":"孤立;隔離;脫離"},{"s":310,"w":"ISSUE","p":"v","c":"發行;發佈"},{"s":311,"w":"JOINT","p":"n","c":"接頭,接縫"},{"s":312,"w":"JOY STICK","p":"n","c":"操作摃"},{"s":313,"w":"KIT","p":"n","c":"工具箱;零件包"},{"s":314,"w":"KNOB","p":"n","c":"球形把手;(收音機等的)旋鈕;圓形的突出"},{"s":315,"w":"LACE","p":"n","c":"綁帶"},{"s":316,"w":"LACK","p":"v","c":"缺乏;不足"},{"s":317,"w":"LADDER","p":"n","c":"梯子"},{"s":318,"w":"LAMINATED","p":"adj","c":"由薄片組成的"},{"s":319,"w":"LAMP","p":"n","c":"照明裝置"},{"s":320,"w":"LATCH","p":"n","c":"閂;門閂;窗閂"},{"s":321,"w":"LATERAL","p":"adj","c":"橫的,橫向的"},{"s":322,"w":"LAYER","p":"n","c":"層;階層;地層"},{"s":323,"w":"LEAKAGE","p":"n","c":"漏;洩漏"},{"s":324,"w":"LEGEND","p":"n","c":"傳說, 圖例"},{"s":325,"w":"LENGTH","p":"n","c":"長度"},{"s":326,"w":"LENS","p":"n","c":"透鏡；鏡頭；晶體"},{"s":327,"w":"LIBERALLY","p":"adv","c":"不受限地"},{"s":328,"w":"LIFTABLE","p":"adv","c":"可舉起的"},{"s":329,"w":"LIGHTING","p":"n","c":"照明"},{"s":330,"w":"LIMIT","p":"n","c":"界線;界限"},{"s":331,"w":"LINEAR","p":"adj","c":"線的,直線的"},{"s":332,"w":"LIQUID","p":"adj","c":"液體的;液態的"},{"s":333,"w":"LITER","p":"n","c":"公升"},{"s":334,"w":"LITHIUM","p":"n","c":"鋰"},{"s":335,"w":"LOCAL","p":"adj","c":"區域的;局部的"},{"s":336,"w":"LOCATION","p":"n","c":"位置;場所"},{"s":337,"w":"LOCATOR","p":"n","c":"電波偵測器"},{"s":338,"w":"LONGITUDINAL","p":"adj","c":"長度的; 經度的"},{"s":339,"w":"LOOSEN","p":"v","c":"鬆開,解開"},{"s":340,"w":"LOUVER","p":"n","c":"天窗"},{"s":341,"w":"LUBE","p":"n","c":"潤滑油"},{"s":342,"w":"LUBRICATE","p":"v","c":"使滑潤;給...上潤滑油"},{"s":343,"w":"MAGNETIC","p":"adj","c":"鐵的;磁性的"},{"s":344,"w":"MAGNIFIER","p":"n","c":"放大器"},{"s":345,"w":"MAINTENANCE","p":"n","c":"維修,保養"},{"s":346,"w":"MALFUNCTION","p":"n","c":"發生故障;機能失常"},{"s":347,"w":"MANDATE","p":"v","c":"強制"},{"s":348,"w":"MANDATORY","p":"adj","c":"命令的;強制的"},{"s":349,"w":"MANUAL","p":"adj","c":"用手操作的"},{"s":350,"w":"MANUALLY","p":"adv","c":"用手地"},{"s":351,"w":"MASTER","p":"v","c":"精通; 控制"},{"s":352,"w":"MATERIAL","p":"n","c":"材料,原料"},{"s":353,"w":"MATING","p":"adj","c":"相配"},{"s":354,"w":"MAXIMUM","p":"adj","c":"最大的;最多的"},{"s":355,"w":"MEASURE","p":"v","c":"測量;計量"},{"s":356,"w":"MECHANICAL","p":"adj","c":"機械的,用機械的"},{"s":357,"w":"MECHANISM","p":"n","c":"機械裝置;機械作用"},{"s":358,"w":"MEDICAL","p":"adj","c":"醫術的;醫療的"},{"s":359,"w":"MELT","p":"v","c":"融化"},{"s":360,"w":"MICROWAVE","p":"n","c":"微波"},{"s":361,"w":"MIDDLE","p":"adj","c":"中部的,中間的"},{"s":362,"w":"MIGRATION","p":"n","c":"遷移"},{"s":363,"w":"MINIMUM","p":"adj","c":"最小的,最少的"},{"s":364,"w":"MINUS","p":"prep","c":"減(去)"},{"s":365,"w":"MIRROR","p":"n","c":"鏡子"},{"s":366,"w":"MISSING","p":"adj","c":"失蹤的;找不到的"},{"s":367,"w":"MIXTURE","p":"n","c":"混合物;混合料"},{"s":368,"w":"MOBILE","p":"adj","c":"機動的"},{"s":369,"w":"MODE","p":"n","c":"形式,狀態;種類"},{"s":370,"w":"MODERATE","p":"adj","c":"中等的,適度的"},{"s":371,"w":"MODULE","p":"n","c":"(航天器的)艙; 組件; 單元"},{"s":372,"w":"MOIST","p":"adj","c":"潮濕的,微濕的"},{"s":373,"w":"MOMENTARILY","p":"adv","c":"短暫地"},{"s":374,"w":"MONITOR","p":"v","c":"監控;監聽"},{"s":375,"w":"MOUNT","p":"n","c":"底座、托板"},{"s":376,"w":"MOVABLE","p":"adj","c":"可動的,可移動的"},{"s":377,"w":"MOVEMENT","p":"n","c":"運動、運轉、動作"},{"s":378,"w":"MULTIPLY","p":"v","c":"乘,使相乘"},{"s":379,"w":"NACELLE","p":"n","c":"(飛機、飛船)的引擎艙; 吊艙; 氣球吊籃"},{"s":380,"w":"NECESSARY","p":"adj","c":"必要的,必需的"},{"s":381,"w":"NEUTRAL","p":"adj","c":"中立的;中性的"},{"s":382,"w":"NIPPLE","p":"n","c":"突狀接頭"},{"s":383,"w":"NORM","p":"n","c":"基準"},{"s":384,"w":"OBEY","p":"v","c":"服從;遵守"},{"s":385,"w":"OBSCURING","p":"adj","c":"暗的;模糊的"},{"s":386,"w":"OBVIOUS","p":"adj","c":"明顯的;顯而易見的"},{"s":387,"w":"OCCUR","p":"v","c":"發生"},{"s":388,"w":"OIL LINE","p":"n","c":"油管"},{"s":389,"w":"OILY","p":"adj","c":"(含)油的；油污；塗油的"},{"s":390,"w":"OPERATE","p":"v","c":"運作;運轉"},{"s":391,"w":"OPPOSITE","p":"adj","c":"相反的,對立的"},{"s":392,"w":"OPTIONAL","p":"adj","c":"選擇性的"},{"s":393,"w":"ORGANIC","p":"adj","c":"有機物的"},{"s":394,"w":"OUTBOARD","p":"adj","c":"在外部"},{"s":395,"w":"OVERBOARD","p":"adv","c":"向艙外"},{"s":396,"w":"OVERHEAD","p":"n","c":"在上頭的;高架的"},{"s":397,"w":"OVERRIDE","p":"v","c":"撤銷,取代"},{"s":398,"w":"OZONE","p":"n","c":"臭氧"},{"s":399,"w":"PALLET","p":"n","c":"(裝卸、搬運貨物用的)托盤"},{"s":400,"w":"PARAGRAPH","p":"n","c":"段落"},{"s":401,"w":"PARENTHESES","p":"n","c":"括弧, 插入語"},{"s":402,"w":"PARKING","p":"n","c":"停放"},{"s":403,"w":"PARTICLE","p":"n","c":"微粒;顆粒"},{"s":404,"w":"PASTE","p":"n","c":"糊,膏"},{"s":405,"w":"PATCH","p":"n","c":"補釘,補片;"},{"s":406,"w":"PATH","p":"n","c":"通路"},{"s":407,"w":"PATTERN","p":"n","c":"花樣, 圖案"},{"s":408,"w":"PERFORMANCE","p":"n","c":"實行;性能"},{"s":409,"w":"PERMANENT","p":"adj","c":"永久的,永恆的"},{"s":410,"w":"PERMITTED","p":"adj","c":"被允許的"},{"s":411,"w":"PILLOW","p":"n","c":"[機]軸枕，墊座"},{"s":412,"w":"PINION","p":"n","c":"小齒輪"},{"s":413,"w":"PITTING","p":"n","c":"金屬表面的腐蝕"},{"s":414,"w":"PLATFORM","p":"n","c":"平台"},{"s":415,"w":"PLUNGER","p":"n","c":"活塞"},{"s":416,"w":"PNEUMATIC","p":"adj","c":"氣動的"},{"s":417,"w":"POLISH","p":"v","c":"磨光,擦亮"},{"s":418,"w":"POSITION","p":"n","c":"位置;地點"},{"s":419,"w":"POSSIBLE","p":"adj","c":"可能的"},{"s":420,"w":"POWER PLANT","p":"n","c":"動力裝置；發動機"},{"s":421,"w":"PRECAUTION","p":"n","c":"預防措施"},{"s":422,"w":"PRECHARGE","p":"v","c":"預先儲存"},{"s":423,"w":"PREPARE","p":"v","c":"準備;籌劃"},{"s":424,"w":"PRESSURIZE","p":"v","c":"加壓於"},{"s":425,"w":"PRIMARY","p":"adj","c":"首要的,主要的"},{"s":426,"w":"PRIOR","p":"adj","c":"優先的;在前的"},{"s":427,"w":"PROBLEM","p":"n","c":"問題,疑難問題"},{"s":428,"w":"PROCEDURE","p":"n","c":"程序;步驟"},{"s":429,"w":"PROCURABLE","p":"adj","c":"可實現的;可獲得的"},{"s":430,"w":"PROGRESS","p":"n","c":"前進；行進"},{"s":431,"w":"PROOF","p":"n","c":"防阻"},{"s":432,"w":"PROPERTY","p":"n","c":"特性,性能"},{"s":433,"w":"PROPORTION","p":"n","c":"比例;比率"},{"s":434,"w":"PROTECTION","p":"n","c":"保護,防護"},{"s":435,"w":"PROTECTIVE","p":"adj","c":"保護的,防護的"},{"s":436,"w":"PUSHROD","p":"n","c":"推桿"},{"s":437,"w":"QUALITY","p":"n","c":"品質"},{"s":438,"w":"QUANTITY","p":"n","c":"量;數量"},{"s":439,"w":"RACK","p":"n","c":"架子; 掛物架; 齒條; 裝配齒輪之齒棒"},{"s":440,"w":"RADIAL","p":"adj","c":"徑向的"},{"s":441,"w":"RADIOACTIVE","p":"adj","c":"放射性的"},{"s":442,"w":"RAFT","p":"n","c":"(救生用)橡皮艇"},{"s":443,"w":"RAMP","p":"n","c":"斜面、坡道"},{"s":444,"w":"RANDOM","p":"adj","c":"隨機的"},{"s":445,"w":"RANGE","p":"n","c":"幅度;範圍"},{"s":446,"w":"RATE","p":"n","c":"比例;比率"},{"s":447,"w":"RAW","p":"adj","c":"未加工的"},{"s":448,"w":"RAY","p":"n","c":"光線"},{"s":449,"w":"REAR","p":"adj","c":"後面;背後"},{"s":450,"w":"RECEIVE","p":"v","c":"收到,接到"},{"s":451,"w":"RECEPTION","p":"n","c":"接待, 接受,"},{"s":452,"w":"RECOMMEND","p":"v","c":"推薦;建議"},{"s":453,"w":"RECONDITION","p":"n","c":"重建"},{"s":454,"w":"REFER","p":"v","c":"查閱,參考"},{"s":455,"w":"REFLECTION","p":"n","c":"反射;回響"},{"s":456,"w":"REFUEL","p":"v","c":"補給燃料"},{"s":457,"w":"REGULAR","p":"adj","c":"規則的;固定的"},{"s":458,"w":"REJECT","p":"v","c":"拒絕;退回"},{"s":459,"w":"RELATED","p":"adj","c":"有關的,相關的"},{"s":460,"w":"REMAINING","p":"adj","c":"剩餘的"},{"s":461,"w":"REPLACE","p":"v","c":"更換"},{"s":462,"w":"REPOSITION","p":"n","c":"貯藏；放回"},{"s":463,"w":"RESOURCE","p":"n","c":"資源"},{"s":464,"w":"RESULT","p":"n","c":"結果;成果"},{"s":465,"w":"RETENTION","p":"n","c":"保持"},{"s":466,"w":"RETRACT","p":"v","c":"撤回,收回"},{"s":467,"w":"RETRACTION","p":"n","c":"收縮;收縮力"},{"s":468,"w":"RETROFIT","p":"n","c":"(飛機等的)翻新"},{"s":469,"w":"REVISION","p":"n","c":"修訂;修正"},{"s":470,"w":"RIB","p":"n","c":"翼肋"},{"s":471,"w":"ROD","p":"n","c":"棒;桿;竿"},{"s":472,"w":"ROUGH","p":"adj","c":"粗糙的,粗略的"},{"s":473,"w":"ROUNDED","p":"adj","c":"圓的"},{"s":474,"w":"RUBBER","p":"n","c":"橡膠; 合成橡膠"},{"s":475,"w":"RUDDER","p":"n","c":"方向舵"},{"s":476,"w":"RUST","p":"n","c":"鏽"},{"s":477,"w":"SACHET","p":"n","c":"密封小袋"},{"s":478,"w":"SATISFACTORY","p":"adj","c":"令人滿意的;符合要求的"},{"s":479,"w":"SCALLOPED","p":"adj","c":"扇形邊的"},{"s":480,"w":"SCATTER","p":"v","c":"消散; 分散; 散播"},{"s":481,"w":"SCAVENGE","p":"v","c":"排除廢氣;清除污物;在…搜尋有用之物"},{"s":482,"w":"SCHEDULE","p":"v","c":"將...列入計劃(或時間)表"},{"s":483,"w":"SEAL","p":"n","c":"密封墊"},{"s":484,"w":"SECONDARY","p":"adj","c":"次要的;輔助的"},{"s":485,"w":"SELECTION","p":"n","c":"選擇"},{"s":486,"w":"SEMICIRCULAR","p":"adj","c":"半圓的"},{"s":487,"w":"SENSITIVE","p":"adj","c":"易受損的"},{"s":488,"w":"SEPARATION","p":"n","c":"分開;分離"},{"s":489,"w":"SEQUENCE","p":"n","c":"次序;順序;先後"},{"s":490,"w":"SERIES","p":"n","c":"系列;連續"},{"s":491,"w":"SERRATION","p":"n","c":"鋸齒狀;鋸齒狀突起"},{"s":492,"w":"SERVICEABLE","p":"adj","c":"可用的;可供使用的"},{"s":493,"w":"SERVICING","p":"n","c":"檢修,維修,保養"},{"s":494,"w":"SERVOVALVE","p":"n","c":"伺服阀"},{"s":495,"w":"SET UP","p":"n","c":"建立"},{"s":496,"w":"SHAKE","p":"v","c":"搖動;震動"},{"s":497,"w":"SHAPE","p":"n","c":"形狀;外形"},{"s":498,"w":"SHARP","p":"adj","c":"銳利地"},{"s":499,"w":"SHEET","p":"n","c":"表單，表格"},{"s":500,"w":"SHELF","p":"n","c":"架子"},{"s":501,"w":"SHIPPING","p":"v","c":"運送"},{"s":502,"w":"SHUTDOWN","p":"n","c":"關門；停工"},{"s":503,"w":"SIDESTAY","p":"n","c":"側定位"},{"s":504,"w":"SILL","p":"n","c":"門檻"},{"s":505,"w":"SILVER","p":"n","c":"銀"},{"s":506,"w":"SIMULATE","p":"v","c":"模擬"},{"s":507,"w":"SLAT","p":"n","c":"前緣襟翼"},{"s":508,"w":"SLIVER","p":"n","c":"裂片、細片"},{"s":509,"w":"SLOTS","p":"n","c":"狹縫"},{"s":510,"w":"SMOOTH","p":"adj","c":"光滑地,平滑地"},{"s":511,"w":"SOAK","p":"v","c":"浸泡, 浸漬"},{"s":512,"w":"SOURCE","p":"n","c":"根源;來源"},{"s":513,"w":"SPARK","p":"n","c":"火花,火星"},{"s":514,"w":"SPECIFIED","p":"adj","c":"指定的"},{"s":515,"w":"SPHERICAL","p":"adj","c":"球的;球面的"},{"s":516,"w":"SPILL","p":"v","c":"溢出"},{"s":517,"w":"SPINDLE","p":"n","c":"軸，心軸"},{"s":518,"w":"SPINDLE YOKE","p":"n","c":"飛行操縱桿；偏轉線圈；"},{"s":519,"w":"SPOT","p":"n","c":"斑點;汙點"},{"s":520,"w":"SPRAY","p":"n","c":"噴灑"},{"s":521,"w":"STABLE","p":"adj","c":"穩定的;平穩的"},{"s":522,"w":"STAND","p":"n","c":"架子，座"},{"s":523,"w":"STANDARD","p":"adj","c":"標準的"},{"s":524,"w":"STARTER","p":"n","c":"啟動器"},{"s":525,"w":"STEM","p":"n","c":"(工具的)炳，把，桿"},{"s":526,"w":"STIFF","p":"n","c":"剛性"},{"s":527,"w":"STOW","p":"v","c":"收回"},{"s":528,"w":"STRAIGHT","p":"adj","c":"直立的;挺直地"},{"s":529,"w":"STREAK","p":"n","c":"條紋"},{"s":530,"w":"STRIP","p":"n","c":"帶子"},{"s":531,"w":"STRIPE","p":"n","c":"條紋;線條"},{"s":532,"w":"STROBE","p":"n","c":"閃光"},{"s":533,"w":"STRUCTURE","p":"n","c":"結構;構造;組織"},{"s":534,"w":"SUBASSEMBLY","p":"n","c":"次組合件"},{"s":535,"w":"SUBSEQUENT","p":"adj","c":"後來的"},{"s":536,"w":"SUBTRACT","p":"v","c":"減去;去掉"},{"s":537,"w":"SUDDEN","p":"adj","c":"突然的;意外的"},{"s":538,"w":"SUFFICIENT","p":"adj","c":"足夠的,充分的"},{"s":539,"w":"SUPERNUMERARY","p":"adj","c":"多餘的；過剩的；額外的"},{"s":540,"w":"SURGE","p":"v","c":"猛衝；激增；[電]浪湧"},{"s":541,"w":"SURVEILLANCE","p":"n","c":"監視，監督，管制"},{"s":542,"w":"SUSPECTED","p":"adj","c":"被懷疑的;可能存在的"},{"s":543,"w":"SWAB","p":"n","c":"醫用海綿；紗布；拖把"},{"s":544,"w":"SYMMETRICAL","p":"adj","c":"對稱的"},{"s":545,"w":"SYNCHRONIZED","p":"adj","c":"同步的"},{"s":546,"w":"SYNTHETIC","p":"adj","c":"合成的"},{"s":547,"w":"SYRINGE","p":"n","c":"注射器"},{"s":548,"w":"TACKY","p":"adj","c":"發黏的;(漆等)尚未乾透的"},{"s":549,"w":"TAP","p":"v","c":"輕拍,輕叩"},{"s":550,"w":"TAPE","p":"n","c":"帶子；膠布；捲尺"},{"s":551,"w":"TASK","p":"n","c":"任務;工作"},{"s":552,"w":"TELESCOPIC","p":"adj","c":"望遠鏡的;可伸縮的"},{"s":553,"w":"TEMPORARILY","p":"adv","c":"暫時地,臨時地"},{"s":554,"w":"THICK","p":"adj","c":"厚厚地;密集地"},{"s":555,"w":"THIN","p":"adj","c":"薄;稀"},{"s":556,"w":"THRUST","p":"n","c":"推力;刺;插"},{"s":557,"w":"TIGHTEN","p":"v","c":"上緊,使繃緊"},{"s":558,"w":"TILT","p":"v","c":"傾斜;翹起"},{"s":559,"w":"TIRE","p":"n","c":"輪胎；(車輪的)輪箍"},{"s":560,"w":"TOGGLE","p":"n","c":"栓扣；[機]肘節；開關"},{"s":561,"w":"TOLERANCE","p":"n","c":"容許誤差"},{"s":562,"w":"TORQUE","p":"v","c":"上扭力"},{"s":563,"w":"TOW","p":"v","c":"拖,拉;牽引"},{"s":564,"w":"TRACK","p":"n","c":"軌道"},{"s":565,"w":"TRAILING","p":"n","c":"後緣"},{"s":566,"w":"TRANSDUCER","p":"n","c":"變換器.換能器"},{"s":567,"w":"TRANSMIT","p":"v","c":"傳送;發射"},{"s":568,"w":"TRANSPARENT","p":"adj","c":"透明的;清澈的"},{"s":569,"w":"TRANSVERSE","p":"adj","c":"橫向的; 橫斷的; 橫切的"},{"s":570,"w":"TRAVEL","p":"n","c":"經過;移動遊遍"},{"s":571,"w":"TRAY","p":"n","c":"盤子, 托盤"},{"s":572,"w":"TREAD","p":"n","c":"(輪胎的)胎面"},{"s":573,"w":"TRUNNION","p":"n","c":"耳軸"},{"s":574,"w":"TURBINE","p":"n","c":"渦輪(機)"},{"s":575,"w":"TWIST","p":"v","c":"扭轉;扭彎"},{"s":576,"w":"TYPICAL","p":"adj","c":"典型的,有代表性的"},{"s":577,"w":"ULTRASONIC","p":"n","c":"超音波的; 超音速的"},{"s":578,"w":"UNFOLD","p":"v","c":"展開;呈現"},{"s":579,"w":"UNKNOWN","p":"adj","c":"不知道的;未知的"},{"s":580,"w":"UNLOCK","p":"v","c":"開;開啟"},{"s":581,"w":"UNSERVICEABLE","p":"adj","c":"不能再使用的;不適用的"},{"s":582,"w":"UNUSUAL","p":"adj","c":"不平常的"},{"s":583,"w":"UNWANTED","p":"adj","c":"不需要的;多餘的"},{"s":584,"w":"UPON","p":"prep","c":"在…之上"},{"s":585,"w":"UPSTOP","p":"n","c":"上擋塊"},{"s":586,"w":"UPSTREAM","p":"adj","c":"上游的"},{"s":587,"w":"VERIFY","p":"v","c":"證明；證實"},{"s":588,"w":"VERSUS","p":"prep","c":"與…相對，與…相比"},{"s":589,"w":"VERTICAL","p":"adj","c":"垂直的;立式的"},{"s":590,"w":"VIBRATION","p":"n","c":"振動;震動"},{"s":591,"w":"VISUAL","p":"adj","c":"視力的;視覺的"},{"s":592,"w":"VOLUME","p":"n","c":"體積;容積"},{"s":593,"w":"WAXY","p":"adj","c":"蠟的"},{"s":594,"w":"WELL","p":"n","c":"艙"},{"s":595,"w":"WIDER","p":"adj","c":"寬鬆的"},{"s":596,"w":"WIPER","p":"n","c":"雨刷；刷子"},{"s":597,"w":"WITNESS","p":"n","c":"證據;目擊"},{"s":598,"w":"WORKSTAND","p":"n","c":"工作台"},{"s":599,"w":"WORST-CASE","p":"adj","c":"最糟情況的；作最壞打算的"},{"s":600,"w":"YOKE","p":"n","c":"軛形物；[電]軛鐵；飛行操縱桿；[電子]"},{"s":601,"w":"ZERK","p":"n","c":"(油嘴的類型名稱)"},{"s":602,"w":"ZIPPER","p":"n","c":"拉鍊"},{"s":603,"w":"ZONAL","p":"adj","c":"帶的；帶狀的；劃成區域的；形成地帶"}];
+
+const POS_LABEL = {
+  'n':'名詞 · n.', 'v':'動詞 · v.', 'adj':'形容詞 · adj.', 'adv':'副詞 · adv.',
+  'prep':'介系詞 · prep.', 'vt':'及物動詞 · vt.', 'adj./v':'形容詞/動詞', '?':'未標示詞性'
+};
+
+const WEEK_SIZE = 120;
+const WEEKS = [];
+for(let i=0;i<VOCAB.length;i+=WEEK_SIZE){
+  WEEKS.push(VOCAB.slice(i, i+WEEK_SIZE));
+}
+
+let progress = { words:{}, days:[] };
+let currentWeekIdx = null;
+let sessionQueue = [];
+let sessionIdx = 0;
+let sessionCorrect = 0;
+let sessionNewMastered = 0;
+let answered = false;
+
+const STORAGE_KEY = 'aviation-vocab-progress-v1';
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function hasCloudStorage(){
+  return typeof window !== 'undefined' && !!window.storage &&
+    typeof window.storage.get === 'function' && typeof window.storage.set === 'function';
+}
+
+let storageMode = 'none'; // 'cloud' | 'local' | 'none'
+
+async function testCloudStorage(){
+  if(!hasCloudStorage()) return false;
+  try{
+    const testKey = STORAGE_KEY + '-selftest';
+    await window.storage.set(testKey, '1');
+    const r = await window.storage.get(testKey);
+    return !!(r && r.value === '1');
+  }catch(e){ return false; }
+}
+
+function testLocalStorage(){
+  try{
+    const k = '__selftest__' + Date.now();
+    localStorage.setItem(k, '1');
+    const ok = localStorage.getItem(k) === '1';
+    localStorage.removeItem(k);
+    return ok;
+  }catch(e){ return false; }
+}
+
+async function detectStorageMode(){
+  if(await testCloudStorage()){ storageMode = 'cloud'; return; }
+  if(testLocalStorage()){ storageMode = 'local'; return; }
+  storageMode = 'none';
+}
+
+function renderStorageStatus(){
+  const el = document.getElementById('storageStatus');
+  if(!el) return;
+  if(storageMode === 'cloud'){
+    el.textContent = '✅ 已連接 Claude 雲端儲存，進度會自動保存。';
+    el.className = 'storage-status ok';
+  } else if(storageMode === 'local'){
+    el.textContent = '✅ 已啟用瀏覽器本機儲存，進度會保存在「這個瀏覽器 + 這個檔案位置」。換瀏覽器、無痕模式或搬移檔案位置，進度不會延續，建議定期用下方「匯出進度」備份。';
+    el.className = 'storage-status warn';
+  } else {
+    el.textContent = '⚠️ 偵測不到可用的儲存空間，目前的環境無法自動保存進度（可能是在封閉的檔案預覽器中開啟）。請改用手機或電腦上的瀏覽器（如 Safari、Chrome）直接開啟此檔案；每次練習完也請務必用下方「匯出進度」手動備份。';
+    el.className = 'storage-status bad';
+  }
+}
+
+async function loadProgress(){
+  // Preferred: Claude's in-chat persistent storage (works when viewed inside Claude)
+  if(hasCloudStorage()){
+    try{
+      const res = await window.storage.get(STORAGE_KEY);
+      if(res && res.value){
+        const parsed = JSON.parse(res.value);
+        if(parsed && typeof parsed === 'object'){
+          return { words: parsed.words || {}, days: parsed.days || [] };
+        }
+      }
+    }catch(e){}
+  }
+  // Fallback: browser localStorage (works when the file is downloaded and opened directly)
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && typeof parsed === 'object'){
+        return { words: parsed.words || {}, days: parsed.days || [] };
+      }
+    }
+  }catch(e){}
+  return { words:{}, days:[] };
+}
+
+async function doSave(){
+  let ok = false;
+  const json = JSON.stringify(progress);
+  if(hasCloudStorage()){
+    try{ await window.storage.set(STORAGE_KEY, json); ok = true; }catch(e){}
+  }
+  try{ localStorage.setItem(STORAGE_KEY, json); ok = true; }catch(e){}
+  return ok;
+}
+
+function markToday(){
+  const t = todayStr();
+  if(!progress.days.includes(t)){
+    progress.days.push(t);
+  }
+}
+
+async function recordAnswer(seq, correct){
+  markToday();
+  const w = progress.words[seq] || { c:0, w:0, m:false };
+  const wasMastered = w.m;
+  if(correct){
+    w.c += 1;
+    if(w.c >= 1) w.m = true;
+  } else {
+    w.w += 1;
+    w.c = 0;
+  }
+  progress.words[seq] = w;
+  const saved = await doSave();
+  return { newlyMastered: (!wasMastered && w.m), saved };
+}
+
+function isMastered(seq){
+  return !!(progress.words[seq] && progress.words[seq].m);
+}
+
+function weekMasteredCount(weekIdx){
+  return WEEKS[weekIdx].filter(v => isMastered(v.s)).length;
+}
+
+function totalMasteredCount(){
+  let n = 0;
+  for(const v of VOCAB) if(isMastered(v.s)) n++;
+  return n;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildHintCells(word){
+  let shown = false;
+  const cells = [];
+  for(const ch of word){
+    if(/[A-Za-z]/.test(ch)){
+      if(!shown){
+        cells.push({type:'letter', show:true, ch: ch.toLowerCase()});
+        shown = true;
+      } else {
+        cells.push({type:'letter', show:false, ch:''});
+      }
+    } else if(ch === ' '){
+      cells.push({type:'space'});
+    } else {
+      cells.push({type:'punct', ch: ch});
+    }
+  }
+  return cells;
+}
+
+function normalizeAnswer(s){
+  return s.trim().toUpperCase().replace(/\s+/g, ' ');
+}
+
+// ---------- RENDER: HOME ----------
+function renderHome(){
+  document.getElementById('statMastered').textContent = totalMasteredCount();
+  document.getElementById('statTotal').textContent = VOCAB.length;
+  document.getElementById('statDays').textContent = progress.days.length;
+  const pct = VOCAB.length ? Math.round(totalMasteredCount() / VOCAB.length * 100) : 0;
+  document.getElementById('overallFill').style.width = pct + '%';
+
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+  WEEKS.forEach((week, idx) => {
+    const start = week[0].s, end = week[week.length-1].s;
+    const mastered = weekMasteredCount(idx);
+    const total = week.length;
+    const pct = total ? Math.round(mastered/total*100) : 0;
+    const done = mastered === total;
+
+    const card = document.createElement('button');
+    card.className = 'week-card' + (done ? ' done' : '');
+    card.innerHTML = `
+      <div class="wk-label">第 ${idx+1} 週</div>
+      <div class="wk-range">${start}–${end}</div>
+      <div class="week-progress-track"><div class="week-progress-fill" style="width:${pct}%"></div></div>
+      <div class="wk-stat"><b>${mastered}</b> / ${total} 已熟記</div>
+    `;
+    card.addEventListener('click', () => startWeek(idx));
+    grid.appendChild(card);
+  });
+}
+
+// ---------- QUIZ ----------
+function startWeek(idx){
+  currentWeekIdx = idx;
+  const week = WEEKS[idx];
+  let unmastered = week.filter(v => !isMastered(v.s));
+  if(unmastered.length === 0){
+    sessionQueue = shuffle(week);
+  } else {
+    sessionQueue = shuffle(unmastered);
+  }
+  sessionIdx = 0;
+  sessionCorrect = 0;
+  sessionNewMastered = 0;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  const item = sessionQueue[sessionIdx];
+  document.getElementById('quizProgressText').textContent = (sessionIdx+1) + ' / ' + sessionQueue.length;
+  document.getElementById('quizProgressFill').style.width = Math.round((sessionIdx)/sessionQueue.length*100) + '%';
+  document.getElementById('posChip').textContent = POS_LABEL[item.p] || item.p;
+  document.getElementById('meaningText').textContent = item.c;
+  const letterCount = item.w.replace(/[^A-Za-z]/g,'').length;
+  document.getElementById('letterCount').textContent = letterCount + ' 個字母';
+
+  const hintRow = document.getElementById('hintRow');
+  hintRow.innerHTML = '';
+  buildHintCells(item.w).forEach(cell => {
+    if(cell.type === 'letter'){
+      const span = document.createElement('span');
+      span.className = 'ltr-box';
+      span.textContent = cell.show ? cell.ch : '';
+      hintRow.appendChild(span);
+    } else if(cell.type === 'space'){
+      const span = document.createElement('span');
+      span.className = 'sep-space';
+      hintRow.appendChild(span);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'sep-hyphen';
+      span.textContent = cell.ch;
+      hintRow.appendChild(span);
+    }
+  });
+
+  const input = document.getElementById('answerInput');
+  input.value = '';
+  input.classList.remove('correct','wrong');
+  document.getElementById('errMsg').textContent = '';
+  document.getElementById('feedbackMsg').textContent = '';
+  document.getElementById('feedbackMsg').className = 'feedback-msg';
+  document.getElementById('saveNote').textContent = '';
+  document.getElementById('saveNote').className = 'save-note';
+  document.getElementById('actionBtn').textContent = '檢查答案';
+  input.focus();
+}
+
+async function checkAnswer(){
+  const input = document.getElementById('answerInput');
+  const errMsg = document.getElementById('errMsg');
+  const val = input.value;
+  if(!val.trim()){
+    errMsg.textContent = '請先輸入答案';
+    return;
+  }
+  errMsg.textContent = '';
+
+  const item = sessionQueue[sessionIdx];
+  const correct = normalizeAnswer(val) === normalizeAnswer(item.w);
+  const feedbackEl = document.getElementById('feedbackMsg');
+
+  if(correct){
+    input.classList.add('correct');
+    feedbackEl.textContent = '答對了！';
+    feedbackEl.className = 'feedback-msg ok';
+    sessionCorrect++;
+  } else {
+    input.classList.add('wrong');
+    feedbackEl.textContent = '答錯了，正確答案：' + item.w;
+    feedbackEl.className = 'feedback-msg no';
+  }
+
+  answered = true;
+  document.getElementById('actionBtn').textContent = '儲存中…';
+  document.getElementById('actionBtn').disabled = true;
+
+  const result = await recordAnswer(item.s, correct);
+  if(result.newlyMastered) sessionNewMastered++;
+
+  const saveNote = document.getElementById('saveNote');
+  if(saveNote){
+    saveNote.textContent = result.saved ? '✅ 這一題已儲存' : '⚠️ 這一題儲存失敗';
+    saveNote.className = 'save-note ' + (result.saved ? 'ok' : 'bad');
+  }
+
+  document.getElementById('actionBtn').disabled = false;
+  document.getElementById('actionBtn').textContent = (sessionIdx+1 < sessionQueue.length) ? '下一題' : '完成本次練習';
+}
+
+function nextOrFinish(){
+  if(!answered){
+    checkAnswer();
+    return;
+  }
+  if(sessionIdx + 1 < sessionQueue.length){
+    sessionIdx++;
+    renderQuestion();
+  } else {
+    finishSession();
+  }
+}
+
+function finishSession(){
+  document.getElementById('quizProgressFill').style.width = '100%';
+  const total = sessionQueue.length;
+  const pct = total ? Math.round(sessionCorrect/total*100) : 0;
+  document.getElementById('summaryAccuracy').textContent = pct + '%';
+  document.getElementById('summaryCorrect').textContent = sessionCorrect + ' / ' + total;
+  document.getElementById('summaryNewMastered').textContent = sessionNewMastered;
+  showScreen('summary');
+}
+
+// ---------- SCREEN SWITCH ----------
+function showScreen(name){
+  document.getElementById('homeScreen').classList.toggle('hidden', name !== 'home');
+  document.getElementById('quizScreen').classList.toggle('hidden', name !== 'quiz');
+  document.getElementById('summaryScreen').classList.toggle('hidden', name !== 'summary');
+  if(name === 'home') renderHome();
+}
+
+// ---------- EVENTS ----------
+let toastTimer = null;
+function showToast(msg, type){
+  let el = document.getElementById('toastEl');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'toastEl';
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2500);
+}
+
+document.getElementById('quizBackBtn').addEventListener('click', () => showScreen('home'));
+document.getElementById('manualSaveBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('manualSaveBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '儲存中…';
+  await detectStorageMode();
+  const ok = await doSave();
+  renderStorageStatus();
+  showToast(
+    ok ? '✅ 目前進度已手動儲存成功' : '⚠️ 儲存失敗，這個環境無法保存，請改用瀏覽器開啟此檔案，或用「匯出進度」備份',
+    ok ? 'ok' : 'bad'
+  );
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+});
+document.getElementById('actionBtn').addEventListener('click', nextOrFinish);
+document.getElementById('answerInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    nextOrFinish();
+  }
+});
+document.getElementById('answerInput').addEventListener('input', () => {
+  document.getElementById('errMsg').textContent = '';
+});
+document.getElementById('summaryHomeBtn').addEventListener('click', () => showScreen('home'));
+document.getElementById('summaryAgainBtn').addEventListener('click', () => startWeek(currentWeekIdx));
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('resetModal').classList.remove('hidden');
+});
+document.getElementById('resetCancelBtn').addEventListener('click', () => {
+  document.getElementById('resetModal').classList.add('hidden');
+});
+document.getElementById('resetConfirmBtn').addEventListener('click', async () => {
+  progress = { words:{}, days:[] };
+  await doSave();
+  document.getElementById('resetModal').classList.add('hidden');
+  showScreen('home');
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const payload = {
+    app: 'aviation-vocab', version: 1,
+    exportedAt: new Date().toISOString(),
+    progress: progress
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = todayStr();
+  a.href = url;
+  a.download = 'vocab-progress-' + stamp + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      const p = parsed && parsed.progress ? parsed.progress : parsed;
+      if(!p || typeof p !== 'object' || typeof p.words !== 'object'){
+        alert('這個檔案格式看起來不正確，無法匯入。');
+        return;
+      }
+      progress = { words: p.words || {}, days: Array.isArray(p.days) ? p.days : [] };
+      await doSave();
+      showScreen('home');
+      alert('匯入成功！');
+    }catch(err){
+      alert('讀取失敗，請確認選的是本App匯出的備份檔。');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ---------- INIT ----------
+(async function init(){
+  await detectStorageMode();
+  progress = await loadProgress();
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('mainContent').classList.remove('hidden');
+  showScreen('home');
+  renderStorageStatus();
+})();
+</script>
+</body>
+</html>
