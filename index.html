@@ -861,13 +861,9 @@ function renderQuestion(){
   document.getElementById('meaningText').textContent = item.c;
 
   const starBtn = document.getElementById('starBtn');
-  if(isTestMode){
-    starBtn.classList.add('hidden');
-  } else {
-    starBtn.classList.remove('hidden');
-    starBtn.textContent = isStarred(item.s) ? '★' : '☆';
-    starBtn.classList.toggle('active', isStarred(item.s));
-  }
+  starBtn.classList.remove('hidden');
+  starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+  starBtn.classList.toggle('active', isStarred(item.s));
 
   const hintRow = document.getElementById('hintRow');
   hintRow.innerHTML = '';
