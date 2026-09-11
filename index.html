@@ -309,6 +309,7 @@
     color:var(--red);font-size:14px;
   }
   .wrong-item .wi-meaning{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .wrong-item .wi-user-answer{font-size:12px;color:var(--red);margin-top:3px;}
 
   .starred-item-row{
     display:flex;align-items:center;gap:10px;
@@ -1054,7 +1055,7 @@ async function checkAnswer(){
     input.classList.add('wrong');
     feedbackEl.textContent = '答錯了，正確答案：' + item.w;
     feedbackEl.className = 'feedback-msg no';
-    sessionWrongWords.push(item);
+    sessionWrongWords.push({ item: item, userAnswer: val.trim() });
   }
 
   answered = true;
@@ -1110,16 +1111,25 @@ function finishSession(){
       wrongWrap.classList.remove('hidden');
       const listEl = document.getElementById('wrongList');
       listEl.innerHTML = '';
-      sessionWrongWords.forEach(w => {
+      sessionWrongWords.forEach(entry => {
+        const item = entry.item;
         const div = document.createElement('div');
         div.className = 'wrong-item';
+
         const wordEl = document.createElement('div');
         wordEl.className = 'wi-word';
-        wordEl.textContent = w.w;
+        wordEl.textContent = item.w;
+
+        const userEl = document.createElement('div');
+        userEl.className = 'wi-user-answer';
+        userEl.textContent = '你的答案：' + (entry.userAnswer || '（空白）');
+
         const meaningEl = document.createElement('div');
         meaningEl.className = 'wi-meaning';
-        meaningEl.textContent = w.c;
+        meaningEl.textContent = item.c;
+
         div.appendChild(wordEl);
+        div.appendChild(userEl);
         div.appendChild(meaningEl);
         listEl.appendChild(div);
       });
