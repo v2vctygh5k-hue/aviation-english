@@ -345,6 +345,32 @@
   .wb-item .sr-pos{font-size:10.5px;}
   .wb-item .sr-meaning{font-size:11.5px;}
   .wb-item .star-remove-btn{font-size:18px;}
+
+  .flashcard{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:18px;padding:40px 24px;position:relative;
+    min-height:340px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    cursor:pointer;user-select:none;
+  }
+  .fc-english{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:32px;color:var(--text);margin-bottom:16px;
+    letter-spacing:0.02em;line-height:1.3;
+    overflow-wrap:break-word;word-break:break-word;
+  }
+  .fc-pos{
+    display:inline-block;background:var(--amber-glow);color:var(--amber);
+    border:1px solid var(--amber-dim);border-radius:20px;
+    padding:4px 14px;font-size:12px;font-weight:600;margin-bottom:14px;
+  }
+  .fc-chinese{
+    font-size:22px;font-weight:600;color:var(--text);line-height:1.5;
+  }
+  .fc-hint{
+    position:absolute;bottom:16px;left:0;right:0;text-align:center;
+    font-size:11px;color:var(--text-faint);
+  }
   .summary-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px;}
   .summary-stats div{background:var(--panel-2);border-radius:10px;padding:12px;}
   .summary-stats .n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
@@ -373,6 +399,15 @@
     border-radius:14px;padding:20px;max-width:320px;width:100%;
   }
   .modal-box p{font-size:14px;color:var(--text);margin:0 0 18px;line-height:1.5;}
+  .modal-header-row{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+  .modal-header-row p{margin:0 0 12px;}
+  .modal-back-btn{
+    background:none;border:1px solid var(--border);color:var(--text-dim);
+    border-radius:8px;width:32px;height:32px;font-size:15px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex:none;
+    margin-bottom:12px;
+  }
+  .modal-back-btn:active{transform:scale(0.94);}
   .modal-actions{display:flex;gap:10px;}
   .modal-actions button{
     flex:1;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;
@@ -592,6 +627,21 @@
       <div id="wordBankList"></div>
     </div>
 
+    <!-- FLASHCARD SCREEN -->
+    <div id="flashcardScreen" class="hidden">
+      <div class="quiz-topbar">
+        <button class="back-btn" id="flashcardBackBtn">← 返回</button>
+        <div class="quiz-progress-text" id="flashcardProgressText">0 / 0</div>
+      </div>
+      <div class="flashcard" id="flashcard">
+        <button class="star-btn" id="flashcardStarBtn" aria-label="收藏">☆</button>
+        <div class="fc-english hidden" id="fcEnglish">—</div>
+        <div class="fc-pos" id="fcPos">n</div>
+        <div class="fc-chinese" id="fcChinese">—</div>
+        <div class="fc-hint" id="fcHint">點擊卡片查看英文</div>
+      </div>
+    </div>
+
     <!-- STARRED WORDS SCREEN -->
     <div id="starredScreen" class="hidden">
       <div class="quiz-topbar">
@@ -637,6 +687,10 @@
           <div class="mi-title">📚 單字庫</div>
           <div class="mi-sub">依週次瀏覽全部單字</div>
         </button>
+        <button class="menu-item" id="menuFlashcardBtn">
+          <div class="mi-title">📖 單字書</div>
+          <div class="mi-sub">卡片式翻頁，中文翻英文</div>
+        </button>
         <button class="menu-item" id="menuStarredBtn">
           <div class="mi-title">⭐️ 難字收藏</div>
           <div class="mi-sub">依週次查看你收藏的單字</div>
@@ -660,7 +714,10 @@
 
   <div class="modal-overlay hidden" id="resetWeekModal">
     <div class="modal-box">
-      <p style="margin-bottom:10px;">選擇要重設進度的週次：</p>
+      <div class="modal-header-row">
+        <button class="modal-back-btn" id="resetWeekBackBtn" aria-label="返回選單">←</button>
+        <p>選擇要重設進度的週次：</p>
+      </div>
       <div class="select-all-row">
         <input type="checkbox" id="resetSelectAll">
         <label for="resetSelectAll">全選</label>
@@ -675,7 +732,10 @@
 
   <div class="modal-overlay hidden" id="testSelectModal">
     <div class="modal-box">
-      <p style="margin-bottom:12px;">選擇週次測驗：</p>
+      <div class="modal-header-row">
+        <button class="modal-back-btn" id="testSelectBackBtn" aria-label="返回選單">←</button>
+        <p>選擇週次測驗：</p>
+      </div>
       <div class="test-list" id="testList"></div>
       <button class="btn-secondary" id="testSelectCloseBtn" style="margin-top:12px;">取消</button>
     </div>
@@ -683,7 +743,10 @@
 
   <div class="modal-overlay hidden" id="starredWeekModal">
     <div class="modal-box">
-      <p style="margin-bottom:12px;">選擇要查看的週次：</p>
+      <div class="modal-header-row">
+        <button class="modal-back-btn" id="starredWeekBackBtn" aria-label="返回選單">←</button>
+        <p>選擇要查看的週次：</p>
+      </div>
       <div class="test-list" id="starredWeekList"></div>
       <button class="btn-secondary" id="starredWeekCloseBtn" style="margin-top:12px;">取消</button>
     </div>
@@ -691,7 +754,10 @@
 
   <div class="modal-overlay hidden" id="customTestModal">
     <div class="modal-box">
-      <p style="margin-bottom:10px;">選擇要測驗的週次與題數：</p>
+      <div class="modal-header-row">
+        <button class="modal-back-btn" id="customTestBackBtn" aria-label="返回選單">←</button>
+        <p>選擇要測驗的週次與題數：</p>
+      </div>
       <div class="custom-test-list" id="customTestList"></div>
       <div class="modal-actions">
         <button class="cancel" id="customTestCancelBtn">取消</button>
@@ -702,9 +768,23 @@
 
   <div class="modal-overlay hidden" id="wordBankWeekModal">
     <div class="modal-box">
-      <p style="margin-bottom:12px;">選擇要瀏覽的週次：</p>
+      <div class="modal-header-row">
+        <button class="modal-back-btn" id="wordBankWeekBackBtn" aria-label="返回選單">←</button>
+        <p>選擇要瀏覽的週次：</p>
+      </div>
       <div class="test-list" id="wordBankWeekList"></div>
       <button class="btn-secondary" id="wordBankWeekCloseBtn" style="margin-top:12px;">取消</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="flashcardWeekModal">
+    <div class="modal-box">
+      <div class="modal-header-row">
+        <button class="modal-back-btn" id="flashcardWeekBackBtn" aria-label="返回選單">←</button>
+        <p>選擇要練習的週次：</p>
+      </div>
+      <div class="test-list" id="flashcardWeekList"></div>
+      <button class="btn-secondary" id="flashcardWeekCloseBtn" style="margin-top:12px;">取消</button>
     </div>
   </div>
 
@@ -1190,6 +1270,7 @@ function showScreen(name){
   document.getElementById('searchScreen').classList.toggle('hidden', name !== 'search');
   document.getElementById('wordDetailScreen').classList.toggle('hidden', name !== 'wordDetail');
   document.getElementById('wordBankScreen').classList.toggle('hidden', name !== 'wordBank');
+  document.getElementById('flashcardScreen').classList.toggle('hidden', name !== 'flashcard');
   if(name === 'home') renderHome();
 }
 
@@ -1251,6 +1332,11 @@ document.getElementById('summaryAgainBtn').addEventListener('click', () => {
 });
 
 // ---------- MENU ----------
+function backToMenu(currentModalId){
+  document.getElementById(currentModalId).classList.add('hidden');
+  document.getElementById('menuModal').classList.remove('hidden');
+}
+
 document.getElementById('menuBtn').addEventListener('click', () => {
   document.getElementById('menuModal').classList.remove('hidden');
 });
@@ -1277,8 +1363,90 @@ document.getElementById('menuWordBankBtn').addEventListener('click', () => {
   document.getElementById('menuModal').classList.add('hidden');
   openWordBankWeekModal();
 });
+document.getElementById('menuFlashcardBtn').addEventListener('click', () => {
+  document.getElementById('menuModal').classList.add('hidden');
+  openFlashcardWeekModal();
+});
 
-// ---------- WORD BANK ----------
+// ---------- FLASHCARD ----------
+let flashcardList = [];
+let flashcardIdx = 0;
+let flashcardFlipped = false;
+
+function openFlashcardWeekModal(){
+  const list = document.getElementById('flashcardWeekList');
+  list.innerHTML = '';
+  WEEKS.forEach((week, idx) => {
+    const start = week[0].s, end = week[week.length-1].s;
+    const btn = document.createElement('button');
+    btn.className = 'test-item';
+    btn.innerHTML = `<div class="ti-title">第 ${idx+1} 週（${start}–${end}）</div><div class="ti-sub">${week.length} 個單字</div>`;
+    btn.addEventListener('click', () => {
+      document.getElementById('flashcardWeekModal').classList.add('hidden');
+      startFlashcards(idx);
+    });
+    list.appendChild(btn);
+  });
+  document.getElementById('flashcardWeekModal').classList.remove('hidden');
+}
+document.getElementById('flashcardWeekCloseBtn').addEventListener('click', () => {
+  document.getElementById('flashcardWeekModal').classList.add('hidden');
+});
+document.getElementById('flashcardWeekBackBtn').addEventListener('click', () => backToMenu('flashcardWeekModal'));
+
+function startFlashcards(idx){
+  flashcardList = shuffle(WEEKS[idx]);
+  flashcardIdx = 0;
+  flashcardFlipped = false;
+  showScreen('flashcard');
+  renderFlashcard();
+}
+
+function renderFlashcard(){
+  const item = flashcardList[flashcardIdx];
+  document.getElementById('flashcardProgressText').textContent = (flashcardIdx+1) + ' / ' + flashcardList.length;
+  document.getElementById('fcPos').textContent = POS_LABEL[item.p] || item.p;
+  document.getElementById('fcChinese').textContent = item.c;
+
+  const engEl = document.getElementById('fcEnglish');
+  const hintEl = document.getElementById('fcHint');
+  if(flashcardFlipped){
+    engEl.textContent = item.w;
+    engEl.classList.remove('hidden');
+    hintEl.textContent = '點擊卡片繼續下一個';
+  } else {
+    engEl.classList.add('hidden');
+    hintEl.textContent = '點擊卡片查看英文';
+  }
+
+  const starBtn = document.getElementById('flashcardStarBtn');
+  starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+  starBtn.classList.toggle('active', isStarred(item.s));
+}
+
+document.getElementById('flashcard').addEventListener('click', (e) => {
+  if(e.target.closest('#flashcardStarBtn')) return;
+  if(!flashcardFlipped){
+    flashcardFlipped = true;
+  } else {
+    flashcardFlipped = false;
+    flashcardIdx = (flashcardIdx + 1) % flashcardList.length;
+  }
+  renderFlashcard();
+});
+
+document.getElementById('flashcardStarBtn').addEventListener('click', async (e) => {
+  e.stopPropagation();
+  const item = flashcardList[flashcardIdx];
+  await toggleStar(item.s);
+  const starBtn = document.getElementById('flashcardStarBtn');
+  starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+  starBtn.classList.toggle('active', isStarred(item.s));
+});
+
+document.getElementById('flashcardBackBtn').addEventListener('click', () => showScreen('home'));
+
+
 function openWordBankWeekModal(){
   const list = document.getElementById('wordBankWeekList');
   list.innerHTML = '';
@@ -1298,6 +1466,7 @@ function openWordBankWeekModal(){
 document.getElementById('wordBankWeekCloseBtn').addEventListener('click', () => {
   document.getElementById('wordBankWeekModal').classList.add('hidden');
 });
+document.getElementById('wordBankWeekBackBtn').addEventListener('click', () => backToMenu('wordBankWeekModal'));
 
 function showWordBankWeek(idx){
   const week = WEEKS[idx];
@@ -1387,6 +1556,7 @@ function openCustomTestModal(){
 document.getElementById('customTestCancelBtn').addEventListener('click', () => {
   document.getElementById('customTestModal').classList.add('hidden');
 });
+document.getElementById('customTestBackBtn').addEventListener('click', () => backToMenu('customTestModal'));
 document.getElementById('customTestStartBtn').addEventListener('click', () => {
   const list = document.getElementById('customTestList');
   const checkedCbs = Array.from(list.querySelectorAll('.custom-week-cb')).filter(cb => cb.checked);
@@ -1428,6 +1598,7 @@ document.getElementById('resetSelectAll').addEventListener('change', (e) => {
 document.getElementById('resetWeekCancelBtn').addEventListener('click', () => {
   document.getElementById('resetWeekModal').classList.add('hidden');
 });
+document.getElementById('resetWeekBackBtn').addEventListener('click', () => backToMenu('resetWeekModal'));
 document.getElementById('resetWeekConfirmBtn').addEventListener('click', async () => {
   const checkedIdxs = Array.from(document.querySelectorAll('.reset-week-cb'))
     .filter(cb => cb.checked)
@@ -1470,6 +1641,7 @@ function openTestSelectModal(){
 document.getElementById('testSelectCloseBtn').addEventListener('click', () => {
   document.getElementById('testSelectModal').classList.add('hidden');
 });
+document.getElementById('testSelectBackBtn').addEventListener('click', () => backToMenu('testSelectModal'));
 
 // ---------- STARRED WORDS ----------
 function openStarredWeekModal(){
@@ -1492,6 +1664,7 @@ function openStarredWeekModal(){
 document.getElementById('starredWeekCloseBtn').addEventListener('click', () => {
   document.getElementById('starredWeekModal').classList.add('hidden');
 });
+document.getElementById('starredWeekBackBtn').addEventListener('click', () => backToMenu('starredWeekModal'));
 
 let pendingUnstar = new Set();
 
