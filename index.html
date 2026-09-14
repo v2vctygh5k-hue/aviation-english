@@ -569,6 +569,15 @@
       </div>
     </div>
 
+    <!-- WORD BANK SCREEN -->
+    <div id="wordBankScreen" class="hidden">
+      <div class="quiz-topbar">
+        <button class="back-btn" id="wordBankBackBtn">← 返回</button>
+        <div class="quiz-progress-text" id="wordBankWeekLabel"></div>
+      </div>
+      <div id="wordBankList"></div>
+    </div>
+
     <!-- STARRED WORDS SCREEN -->
     <div id="starredScreen" class="hidden">
       <div class="quiz-topbar">
@@ -610,9 +619,9 @@
   <div class="modal-overlay hidden" id="menuModal">
     <div class="modal-box">
       <div class="menu-list">
-        <button class="menu-item" id="menuResetBtn">
-          <div class="mi-title">🔄 重設進度</div>
-          <div class="mi-sub">選擇要清除熟記紀錄的週次</div>
+        <button class="menu-item" id="menuWordBankBtn">
+          <div class="mi-title">📚 單字庫</div>
+          <div class="mi-sub">依週次瀏覽全部單字</div>
         </button>
         <button class="menu-item" id="menuStarredBtn">
           <div class="mi-title">⭐️ 難字收藏</div>
@@ -625,6 +634,10 @@
         <button class="menu-item" id="menuCustomBtn">
           <div class="mi-title">🎯 自訂測驗</div>
           <div class="mi-sub">自由選擇週次與抽考題數</div>
+        </button>
+        <button class="menu-item" id="menuResetBtn">
+          <div class="mi-title">🔄 重設進度</div>
+          <div class="mi-sub">選擇要清除熟記紀錄的週次</div>
         </button>
       </div>
       <button class="btn-secondary" id="menuCloseBtn" style="margin-top:0;">關閉</button>
@@ -670,6 +683,14 @@
         <button class="cancel" id="customTestCancelBtn">取消</button>
         <button class="confirm-start" id="customTestStartBtn">開始測驗</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="wordBankWeekModal">
+    <div class="modal-box">
+      <p style="margin-bottom:12px;">選擇要瀏覽的週次：</p>
+      <div class="test-list" id="wordBankWeekList"></div>
+      <button class="btn-secondary" id="wordBankWeekCloseBtn" style="margin-top:12px;">取消</button>
     </div>
   </div>
 
@@ -1154,6 +1175,7 @@ function showScreen(name){
   document.getElementById('starredScreen').classList.toggle('hidden', name !== 'starred');
   document.getElementById('searchScreen').classList.toggle('hidden', name !== 'search');
   document.getElementById('wordDetailScreen').classList.toggle('hidden', name !== 'wordDetail');
+  document.getElementById('wordBankScreen').classList.toggle('hidden', name !== 'wordBank');
   if(name === 'home') renderHome();
 }
 
@@ -1237,6 +1259,80 @@ document.getElementById('menuCustomBtn').addEventListener('click', () => {
   document.getElementById('menuModal').classList.add('hidden');
   openCustomTestModal();
 });
+document.getElementById('menuWordBankBtn').addEventListener('click', () => {
+  document.getElementById('menuModal').classList.add('hidden');
+  openWordBankWeekModal();
+});
+
+// ---------- WORD BANK ----------
+function openWordBankWeekModal(){
+  const list = document.getElementById('wordBankWeekList');
+  list.innerHTML = '';
+  WEEKS.forEach((week, idx) => {
+    const start = week[0].s, end = week[week.length-1].s;
+    const btn = document.createElement('button');
+    btn.className = 'test-item';
+    btn.innerHTML = `<div class="ti-title">第 ${idx+1} 週（${start}–${end}）</div><div class="ti-sub">${week.length} 個單字</div>`;
+    btn.addEventListener('click', () => {
+      document.getElementById('wordBankWeekModal').classList.add('hidden');
+      showWordBankWeek(idx);
+    });
+    list.appendChild(btn);
+  });
+  document.getElementById('wordBankWeekModal').classList.remove('hidden');
+}
+document.getElementById('wordBankWeekCloseBtn').addEventListener('click', () => {
+  document.getElementById('wordBankWeekModal').classList.add('hidden');
+});
+
+function showWordBankWeek(idx){
+  const week = WEEKS[idx];
+  document.getElementById('wordBankWeekLabel').textContent = '第 ' + (idx+1) + ' 週單字庫';
+
+  const wrap = document.getElementById('wordBankList');
+  wrap.innerHTML = '';
+
+  const listEl = document.createElement('div');
+  listEl.className = 'wrong-list';
+  week.forEach(v => {
+    const div = document.createElement('div');
+    div.className = 'wrong-item';
+    const row = document.createElement('div');
+    row.className = 'starred-item-row';
+
+    const wordEl = document.createElement('div');
+    wordEl.className = 'sr-word';
+    wordEl.textContent = v.w;
+
+    const posEl = document.createElement('div');
+    posEl.className = 'sr-pos';
+    posEl.textContent = v.p;
+
+    const meaningEl = document.createElement('div');
+    meaningEl.className = 'sr-meaning';
+    meaningEl.textContent = v.c;
+
+    const starBtn = document.createElement('button');
+    starBtn.className = 'star-remove-btn' + (isStarred(v.s) ? '' : ' inactive');
+    starBtn.textContent = isStarred(v.s) ? '★' : '☆';
+    starBtn.addEventListener('click', async () => {
+      await toggleStar(v.s);
+      starBtn.textContent = isStarred(v.s) ? '★' : '☆';
+      starBtn.classList.toggle('inactive', !isStarred(v.s));
+    });
+
+    row.appendChild(wordEl);
+    row.appendChild(posEl);
+    row.appendChild(meaningEl);
+    row.appendChild(starBtn);
+    div.appendChild(row);
+    listEl.appendChild(div);
+  });
+  wrap.appendChild(listEl);
+  showScreen('wordBank');
+}
+document.getElementById('wordBankBackBtn').addEventListener('click', () => showScreen('home'));
+
 
 // ---------- CUSTOM TEST ----------
 function openCustomTestModal(){
