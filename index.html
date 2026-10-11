@@ -306,10 +306,27 @@
   }
   .wrong-item .wi-word{
     font-family:'JetBrains Mono',monospace;font-weight:700;
-    color:var(--red);font-size:14px;
+    color:var(--text);font-size:14px;
   }
-  .wrong-item .wi-meaning{font-size:12px;color:var(--text-dim);margin-top:2px;}
-  .wrong-item .wi-user-answer{font-size:12px;color:var(--red);margin-top:3px;}
+  .wrong-item .wi-meaning{font-size:12px;color:var(--text-dim);margin-top:4px;}
+  .wrong-item .wi-user-answer{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:14px;color:var(--red);
+  }
+  .wi-correct-row{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;margin-top:4px;
+  }
+
+  .history-card{margin-bottom:18px;}
+  .history-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    gap:8px;margin-bottom:8px;
+  }
+  .history-head .hh-title{font-size:13.5px;font-weight:600;color:var(--text);}
+  .history-head .hh-sub{font-size:11.5px;color:var(--text-dim);white-space:nowrap;}
+  .history-empty{color:var(--text-dim);font-size:13px;text-align:center;padding:30px 0;}
+  .history-allright{color:var(--text-dim);font-size:12.5px;padding:2px 0 4px;}
 
   .starred-item-row{
     display:flex;align-items:center;gap:10px;
@@ -685,6 +702,15 @@
       <div id="starredListWrap"></div>
     </div>
 
+    <!-- TEST HISTORY SCREEN -->
+    <div id="historyScreen" class="hidden">
+      <div class="quiz-topbar">
+        <button class="back-btn" id="historyBackBtn">← 返回</button>
+        <div class="quiz-progress-text">測驗紀錄</div>
+      </div>
+      <div id="historyListWrap"></div>
+    </div>
+
     <!-- SEARCH SCREEN -->
     <div id="searchScreen" class="hidden">
       <div class="quiz-topbar">
@@ -732,6 +758,10 @@
         <button class="menu-item" id="menuStarredBtn">
           <div class="mi-title">⭐️ 難字收藏</div>
           <div class="mi-sub">依週次查看你收藏的單字</div>
+        </button>
+        <button class="menu-item" id="menuHistoryBtn">
+          <div class="mi-title">🧾 測驗紀錄</div>
+          <div class="mi-sub">最近 5 次測驗答錯的單字</div>
         </button>
         <button class="menu-item" id="menuTestBtn">
           <div class="mi-title">📝 週次測驗</div>
@@ -971,7 +1001,7 @@ for(let i=0;i<VOCAB.length;i+=WEEK_SIZE){
   WEEKS.push(VOCAB.slice(i, i+WEEK_SIZE));
 }
 
-let progress = { words:{}, days:[], starred:{}, searchHistory:[] };
+let progress = { words:{}, days:[], starred:{}, searchHistory:[], testHistory:[] };
 let currentWeekIdx = null;
 let isTestMode = false;
 let testWeekLabel = '';
@@ -1047,7 +1077,7 @@ async function loadProgress(){
       if(res && res.value){
         const parsed = JSON.parse(res.value);
         if(parsed && typeof parsed === 'object'){
-          return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [] };
+          return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [], testHistory: Array.isArray(parsed.testHistory) ? parsed.testHistory : [] };
         }
       }
     }catch(e){}
@@ -1058,11 +1088,11 @@ async function loadProgress(){
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && typeof parsed === 'object'){
-        return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [] };
+        return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [], testHistory: Array.isArray(parsed.testHistory) ? parsed.testHistory : [] };
       }
     }
   }catch(e){}
-  return { words:{}, days:[], starred:{}, searchHistory:[] };
+  return { words:{}, days:[], starred:{}, searchHistory:[], testHistory:[] };
 }
 
 async function doSave(){
@@ -1375,6 +1405,20 @@ function nextOrFinish(){
   }
 }
 
+const MAX_TEST_HISTORY = 5;
+function recordTestHistory(total){
+  if(!Array.isArray(progress.testHistory)) progress.testHistory = [];
+  progress.testHistory.unshift({
+    t: Date.now(),
+    label: testWeekLabel,
+    total: total,
+    correct: sessionCorrect,
+    wrong: sessionWrongWords.map(e => ({ s: e.item.s, a: e.userAnswer || '' }))
+  });
+  progress.testHistory = progress.testHistory.slice(0, MAX_TEST_HISTORY);
+  doSave();
+}
+
 function finishSession(){
   document.getElementById('quizProgressFill').style.width = '100%';
   const total = sessionQueue.length;
@@ -1387,6 +1431,7 @@ function finishSession(){
   const wrongWrap = document.getElementById('wrongListWrap');
 
   if(isTestMode){
+    recordTestHistory(total);
     titleEl.textContent = testWeekLabel + ' 完成';
     masteredBox.classList.add('hidden');
     if(sessionWrongWords.length > 0){
@@ -1398,20 +1443,32 @@ function finishSession(){
         const div = document.createElement('div');
         div.className = 'wrong-item';
 
-        const wordEl = document.createElement('div');
-        wordEl.className = 'wi-word';
-        wordEl.textContent = item.w;
-
         const userEl = document.createElement('div');
         userEl.className = 'wi-user-answer';
-        userEl.textContent = '你的答案：' + (entry.userAnswer || '（空白）');
+        userEl.textContent = '我的答案：' + (entry.userAnswer || '（空白）');
+
+        const correctRow = document.createElement('div');
+        correctRow.className = 'wi-correct-row';
+        const correctEl = document.createElement('div');
+        correctEl.className = 'wi-word';
+        correctEl.textContent = '正確答案：' + item.w;
+        const starBtn = document.createElement('button');
+        starBtn.className = 'star-remove-btn' + (isStarred(item.s) ? '' : ' inactive');
+        starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+        starBtn.addEventListener('click', async () => {
+          await toggleStar(item.s);
+          starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+          starBtn.classList.toggle('inactive', !isStarred(item.s));
+        });
+        correctRow.appendChild(correctEl);
+        correctRow.appendChild(starBtn);
 
         const meaningEl = document.createElement('div');
         meaningEl.className = 'wi-meaning';
-        meaningEl.textContent = item.c;
+        meaningEl.textContent = '（' + (item.p || '?') + '）' + item.c;
 
-        div.appendChild(wordEl);
         div.appendChild(userEl);
+        div.appendChild(correctRow);
         div.appendChild(meaningEl);
         listEl.appendChild(div);
       });
@@ -1434,6 +1491,7 @@ function showScreen(name){
   document.getElementById('quizScreen').classList.toggle('hidden', name !== 'quiz');
   document.getElementById('summaryScreen').classList.toggle('hidden', name !== 'summary');
   document.getElementById('starredScreen').classList.toggle('hidden', name !== 'starred');
+  document.getElementById('historyScreen').classList.toggle('hidden', name !== 'history');
   document.getElementById('searchScreen').classList.toggle('hidden', name !== 'search');
   document.getElementById('wordDetailScreen').classList.toggle('hidden', name !== 'wordDetail');
   document.getElementById('wordBankScreen').classList.toggle('hidden', name !== 'wordBank');
@@ -1535,6 +1593,94 @@ document.getElementById('menuFlashcardBtn').addEventListener('click', () => {
   document.getElementById('menuModal').classList.add('hidden');
   openFlashcardWeekModal();
 });
+
+// ---------- TEST HISTORY ----------
+function fmtHistoryTime(ts){
+  const d = new Date(ts);
+  return (d.getMonth()+1) + '/' + d.getDate() + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function renderHistory(){
+  const wrap = document.getElementById('historyListWrap');
+  wrap.innerHTML = '';
+  const hist = progress.testHistory || [];
+  if(hist.length === 0){
+    wrap.innerHTML = '<div class="history-empty">還沒有測驗紀錄</div>';
+    return;
+  }
+  hist.forEach(rec => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+
+    const head = document.createElement('div');
+    head.className = 'history-head';
+    const title = document.createElement('div');
+    title.className = 'hh-title';
+    title.textContent = rec.label || '測驗';
+    const sub = document.createElement('div');
+    sub.className = 'hh-sub';
+    sub.textContent = fmtHistoryTime(rec.t) + '　' + rec.correct + ' / ' + rec.total;
+    head.appendChild(title);
+    head.appendChild(sub);
+    card.appendChild(head);
+
+    const wrongs = (rec.wrong || []).map(w => ({ item: VOCAB.find(v => v.s === w.s), userAnswer: w.a })).filter(e => e.item);
+    if(wrongs.length === 0){
+      const ok = document.createElement('div');
+      ok.className = 'history-allright';
+      ok.textContent = '全部答對 🎉';
+      card.appendChild(ok);
+    } else {
+      const listEl = document.createElement('div');
+      listEl.className = 'wrong-list';
+      listEl.style.maxHeight = 'none';
+      wrongs.forEach(entry => {
+        const item = entry.item;
+        const div = document.createElement('div');
+        div.className = 'wrong-item';
+
+        const userEl = document.createElement('div');
+        userEl.className = 'wi-user-answer';
+        userEl.textContent = '我的答案：' + (entry.userAnswer || '（空白）');
+
+        const correctRow = document.createElement('div');
+        correctRow.className = 'wi-correct-row';
+        const correctEl = document.createElement('div');
+        correctEl.className = 'wi-word';
+        correctEl.textContent = '正確答案：' + item.w;
+        const starBtn = document.createElement('button');
+        starBtn.className = 'star-remove-btn' + (isStarred(item.s) ? '' : ' inactive');
+        starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+        starBtn.addEventListener('click', async () => {
+          await toggleStar(item.s);
+          starBtn.textContent = isStarred(item.s) ? '★' : '☆';
+          starBtn.classList.toggle('inactive', !isStarred(item.s));
+        });
+        correctRow.appendChild(correctEl);
+        correctRow.appendChild(starBtn);
+
+        const meaningEl = document.createElement('div');
+        meaningEl.className = 'wi-meaning';
+        meaningEl.textContent = '（' + (item.p || '?') + '）' + item.c;
+
+        div.appendChild(userEl);
+        div.appendChild(correctRow);
+        div.appendChild(meaningEl);
+        listEl.appendChild(div);
+      });
+      card.appendChild(listEl);
+    }
+    wrap.appendChild(card);
+  });
+}
+
+document.getElementById('menuHistoryBtn').addEventListener('click', () => {
+  document.getElementById('menuModal').classList.add('hidden');
+  renderHistory();
+  showScreen('history');
+});
+document.getElementById('historyBackBtn').addEventListener('click', () => showScreen('home'));
 
 // ---------- FLASHCARD ----------
 let flashcardList = [];
@@ -2062,7 +2208,7 @@ document.getElementById('importFile').addEventListener('change', (e) => {
         alert('這個檔案格式看起來不正確，無法匯入。');
         return;
       }
-      progress = { words: p.words || {}, days: Array.isArray(p.days) ? p.days : [], starred: p.starred || {}, searchHistory: Array.isArray(p.searchHistory) ? p.searchHistory : [] };
+      progress = { words: p.words || {}, days: Array.isArray(p.days) ? p.days : [], starred: p.starred || {}, searchHistory: Array.isArray(p.searchHistory) ? p.searchHistory : [], testHistory: Array.isArray(p.testHistory) ? p.testHistory : [] };
       await doSave();
       showScreen('home');
       alert('匯入成功！');
