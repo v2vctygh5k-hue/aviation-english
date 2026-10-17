@@ -346,6 +346,12 @@
     background:none;border:none;color:var(--amber);font-size:21px;
     cursor:pointer;padding:2px 4px;flex:none;line-height:1;
   }
+  .speak-btn{
+    background:none;border:none;color:var(--text-dim);font-size:16px;
+    cursor:pointer;padding:2px 4px;flex:none;line-height:1;
+  }
+  .speak-btn:active{transform:scale(0.9);}
+  .speak-btn.playing{color:var(--amber);}
   .star-remove-btn:active{transform:scale(0.9);}
   .star-remove-btn.inactive{color:var(--text-faint);}
 
@@ -1788,6 +1794,29 @@ document.getElementById('wordBankWeekCloseBtn').addEventListener('click', () => 
 });
 document.getElementById('wordBankWeekBackBtn').addEventListener('click', () => backToMenu('wordBankWeekModal'));
 
+let speakingBtn = null;
+function speakWord(text, btn){
+  if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
+    showToast('這個瀏覽器不支援朗讀功能', 'bad');
+    return;
+  }
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  if(speakingBtn){ speakingBtn.classList.remove('playing'); speakingBtn = null; }
+  const u = new SpeechSynthesisUtterance(text.toLowerCase());
+  u.lang = 'en-US';
+  u.rate = 0.85;
+  const voices = synth.getVoices();
+  const v = voices.find(x => x.lang === 'en-US') || voices.find(x => x.lang && x.lang.startsWith('en'));
+  if(v) u.voice = v;
+  btn.classList.add('playing');
+  speakingBtn = btn;
+  const done = () => { btn.classList.remove('playing'); if(speakingBtn === btn) speakingBtn = null; };
+  u.onend = done;
+  u.onerror = done;
+  synth.speak(u);
+}
+
 function showWordBankWeek(idx){
   const week = WEEKS[idx];
   document.getElementById('wordBankWeekLabel').textContent = '第 ' + (idx+1) + ' 週單字庫';
@@ -1824,9 +1853,16 @@ function showWordBankWeek(idx){
       starBtn.classList.toggle('inactive', !isStarred(v.s));
     });
 
+    const speakBtn = document.createElement('button');
+    speakBtn.className = 'speak-btn';
+    speakBtn.textContent = '🔊';
+    speakBtn.setAttribute('aria-label', '朗讀');
+    speakBtn.addEventListener('click', () => speakWord(v.w, speakBtn));
+
     row.appendChild(wordEl);
     row.appendChild(posEl);
     row.appendChild(meaningEl);
+    row.appendChild(speakBtn);
     row.appendChild(starBtn);
     div.appendChild(row);
     listEl.appendChild(div);
