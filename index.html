@@ -313,6 +313,7 @@
     font-family:'JetBrains Mono',monospace;font-weight:700;
     font-size:14px;color:var(--red);
   }
+  .wi-btns{display:flex;align-items:center;gap:2px;flex:none;}
   .wi-correct-row{
     display:flex;align-items:center;justify-content:space-between;
     gap:8px;margin-top:4px;
@@ -376,9 +377,11 @@
     align-items:center;justify-content:center;text-align:center;
     cursor:pointer;user-select:none;
   }
+  .fc-eng-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;max-width:100%;}
+  .fc-speak{font-size:22px;padding:6px;}
   .fc-english{
     font-family:'JetBrains Mono',monospace;font-weight:700;
-    font-size:32px;color:var(--text);margin-bottom:16px;
+    font-size:32px;color:var(--text);margin-bottom:0;
     letter-spacing:0.02em;line-height:1.3;
     overflow-wrap:break-word;word-break:break-word;
   }
@@ -676,7 +679,10 @@
       </div>
       <div class="flashcard" id="flashcard">
         <button class="star-btn" id="flashcardStarBtn" aria-label="收藏">☆</button>
-        <div class="fc-english hidden" id="fcEnglish">—</div>
+        <div class="fc-eng-row hidden" id="fcEngRow">
+          <div class="fc-english" id="fcEnglish">—</div>
+          <button class="speak-btn fc-speak" id="fcSpeakBtn" aria-label="朗讀">🔊</button>
+        </div>
         <div class="fc-letter" id="fcLetter"><span class="ltr-box"></span></div>
         <div class="fc-pos" id="fcPos">n</div>
         <div class="fc-chinese" id="fcChinese">—</div>
@@ -1467,8 +1473,12 @@ function finishSession(){
           starBtn.textContent = isStarred(item.s) ? '★' : '☆';
           starBtn.classList.toggle('inactive', !isStarred(item.s));
         });
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'wi-btns';
+        btnGroup.appendChild(makeSpeakBtn(item.w));
+        btnGroup.appendChild(starBtn);
         correctRow.appendChild(correctEl);
-        correctRow.appendChild(starBtn);
+        correctRow.appendChild(btnGroup);
 
         const meaningEl = document.createElement('div');
         meaningEl.className = 'wi-meaning';
@@ -1664,8 +1674,12 @@ function renderHistory(){
           starBtn.textContent = isStarred(item.s) ? '★' : '☆';
           starBtn.classList.toggle('inactive', !isStarred(item.s));
         });
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'wi-btns';
+        btnGroup.appendChild(makeSpeakBtn(item.w));
+        btnGroup.appendChild(starBtn);
         correctRow.appendChild(correctEl);
-        correctRow.appendChild(starBtn);
+        correctRow.appendChild(btnGroup);
 
         const meaningEl = document.createElement('div');
         meaningEl.className = 'wi-meaning';
@@ -1730,15 +1744,16 @@ function renderFlashcard(){
   document.getElementById('fcChinese').textContent = item.c;
 
   const engEl = document.getElementById('fcEnglish');
+  const engRow = document.getElementById('fcEngRow');
   const hintEl = document.getElementById('fcHint');
   const letterEl = document.getElementById('fcLetter');
   if(flashcardFlipped){
     engEl.textContent = item.w;
-    engEl.classList.remove('hidden');
+    engRow.classList.remove('hidden');
     letterEl.classList.add('hidden');
     hintEl.textContent = '點擊卡片繼續下一個';
   } else {
-    engEl.classList.add('hidden');
+    engRow.classList.add('hidden');
     const fl = (item.w.match(/[A-Za-z]/) || [''])[0].toUpperCase();
     letterEl.firstElementChild.textContent = fl;
     letterEl.classList.remove('hidden');
@@ -1751,7 +1766,7 @@ function renderFlashcard(){
 }
 
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if(e.target.closest('#flashcardStarBtn')) return;
+  if(e.target.closest('#flashcardStarBtn') || e.target.closest('#fcSpeakBtn')) return;
   if(!flashcardFlipped){
     flashcardFlipped = true;
   } else {
@@ -1768,6 +1783,12 @@ document.getElementById('flashcardStarBtn').addEventListener('click', async (e) 
   const starBtn = document.getElementById('flashcardStarBtn');
   starBtn.textContent = isStarred(item.s) ? '★' : '☆';
   starBtn.classList.toggle('active', isStarred(item.s));
+});
+
+document.getElementById('fcSpeakBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const item = flashcardList[flashcardIdx];
+  if(item) speakWord(item.w, e.currentTarget);
 });
 
 document.getElementById('flashcardBackBtn').addEventListener('click', () => showScreen('home'));
@@ -1815,6 +1836,15 @@ function speakWord(text, btn){
   u.onend = done;
   u.onerror = done;
   synth.speak(u);
+}
+
+function makeSpeakBtn(word){
+  const b = document.createElement('button');
+  b.className = 'speak-btn';
+  b.textContent = '🔊';
+  b.setAttribute('aria-label', '朗讀');
+  b.addEventListener('click', (e) => { e.stopPropagation(); speakWord(word, b); });
+  return b;
 }
 
 function showWordBankWeek(idx){
@@ -2081,6 +2111,7 @@ function showStarredWeek(idx){
     row.appendChild(wordEl);
     row.appendChild(posEl);
     row.appendChild(meaningEl);
+    row.appendChild(makeSpeakBtn(v.w));
     row.appendChild(removeBtn);
     div.appendChild(row);
     listEl.appendChild(div);
