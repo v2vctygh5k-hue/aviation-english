@@ -353,6 +353,12 @@
   }
   .speak-btn:active{transform:scale(0.9);}
   .speak-btn.playing{color:var(--amber);}
+  .hard-mini{
+    background:none;border:none;font-size:17px;cursor:pointer;padding:2px 4px;
+    flex:none;line-height:1;
+  }
+  .hard-mini:active{transform:scale(0.9);}
+  .hard-btn{right:auto;left:14px;font-size:21px;}
   .star-remove-btn:active{transform:scale(0.9);}
   .star-remove-btn.inactive{color:var(--text-faint);}
 
@@ -628,6 +634,7 @@
 
       <div class="card-panel">
         <button class="star-btn" id="starBtn" aria-label="收藏">☆</button>
+        <button class="star-btn hard-btn" id="hardBtn" aria-label="超難單字">❕</button>
         <div class="pos-chip" id="posChip">n</div>
         <div class="meaning" id="meaningText">—</div>
         <div class="hint-row" id="hintRow"></div>
@@ -679,6 +686,7 @@
       </div>
       <div class="flashcard" id="flashcard">
         <button class="star-btn" id="flashcardStarBtn" aria-label="收藏">☆</button>
+        <button class="star-btn hard-btn" id="flashcardHardBtn" aria-label="超難單字">❕</button>
         <div class="fc-eng-row hidden" id="fcEngRow">
           <div class="fc-english" id="fcEnglish">—</div>
           <button class="speak-btn fc-speak" id="fcSpeakBtn" aria-label="朗讀">🔊</button>
@@ -769,6 +777,9 @@
         </button>
         <button class="menu-item" id="menuStarredBtn">
           <div class="mi-title">⭐️ 難字收藏</div>
+        </button>
+        <button class="menu-item" id="menuHardBtn">
+          <div class="mi-title">❗ 超難單字</div>
         </button>
         <button class="menu-item" id="menuHistoryBtn">
           <div class="mi-title">🧾 測驗紀錄</div>
@@ -1014,7 +1025,7 @@ function pushWeeks(list){
 pushWeeks(VOCAB.filter(v => v.s <= 603));  // 第 1–5 週（601–603 併入第 5 週）
 pushWeeks(VOCAB.filter(v => v.s > 603));   // 第 6 週起（新上傳的單字）
 
-let progress = { words:{}, days:[], starred:{}, searchHistory:[], testHistory:[] };
+let progress = { words:{}, days:[], starred:{}, hard:{}, searchHistory:[], testHistory:[] };
 let currentWeekIdx = null;
 let isTestMode = false;
 let testWeekLabel = '';
@@ -1090,7 +1101,7 @@ async function loadProgress(){
       if(res && res.value){
         const parsed = JSON.parse(res.value);
         if(parsed && typeof parsed === 'object'){
-          return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [], testHistory: Array.isArray(parsed.testHistory) ? parsed.testHistory : [] };
+          return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, hard: parsed.hard || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [], testHistory: Array.isArray(parsed.testHistory) ? parsed.testHistory : [] };
         }
       }
     }catch(e){}
@@ -1101,11 +1112,11 @@ async function loadProgress(){
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && typeof parsed === 'object'){
-        return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [], testHistory: Array.isArray(parsed.testHistory) ? parsed.testHistory : [] };
+        return { words: parsed.words || {}, days: parsed.days || [], starred: parsed.starred || {}, hard: parsed.hard || {}, searchHistory: Array.isArray(parsed.searchHistory) ? parsed.searchHistory : [], testHistory: Array.isArray(parsed.testHistory) ? parsed.testHistory : [] };
       }
     }
   }catch(e){}
-  return { words:{}, days:[], starred:{}, searchHistory:[], testHistory:[] };
+  return { words:{}, days:[], starred:{}, hard:{}, searchHistory:[], testHistory:[] };
 }
 
 async function doSave(){
@@ -1157,6 +1168,39 @@ async function toggleStar(seq){
     progress.starred[seq] = true;
   }
   await doSave();
+}
+
+function isHard(seq){
+  return !!(progress.hard && progress.hard[seq]);
+}
+
+async function toggleHard(seq){
+  if(!progress.hard) progress.hard = {};
+  if(progress.hard[seq]){
+    delete progress.hard[seq];
+  } else {
+    progress.hard[seq] = true;
+  }
+  await doSave();
+}
+
+function setHardIcon(btn, on){
+  btn.textContent = on ? '❗' : '❕';
+  btn.classList.toggle('active', on);
+  btn.classList.toggle('on', on);
+}
+
+function makeHardBtn(seq){
+  const b = document.createElement('button');
+  b.className = 'hard-mini';
+  setHardIcon(b, isHard(seq));
+  b.setAttribute('aria-label', '超難單字');
+  b.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await toggleHard(seq);
+    setHardIcon(b, isHard(seq));
+  });
+  return b;
 }
 
 function weekMasteredCount(weekIdx){
@@ -1254,13 +1298,10 @@ function startWeek(idx){
 }
 
 function pickWithStarredPriority(pool, n){
-  const starred = shuffle(pool.filter(v => isStarred(v.s)));
-  const rest = shuffle(pool.filter(v => !isStarred(v.s)));
-  let picked = starred.slice(0, n);
-  if(picked.length < n){
-    picked = picked.concat(rest.slice(0, n - picked.length));
-  }
-  return picked;
+  const hard = shuffle(pool.filter(v => isHard(v.s)));
+  const starred = shuffle(pool.filter(v => isStarred(v.s) && !isHard(v.s)));
+  const rest = shuffle(pool.filter(v => !isStarred(v.s) && !isHard(v.s)));
+  return hard.concat(starred, rest).slice(0, n);
 }
 
 function buildWeekTestQueue(weekIdx){
@@ -1335,6 +1376,7 @@ function renderQuestion(){
   starBtn.classList.remove('hidden');
   starBtn.textContent = isStarred(item.s) ? '★' : '☆';
   starBtn.classList.toggle('active', isStarred(item.s));
+  setHardIcon(document.getElementById('hardBtn'), isHard(item.s));
 
   const hintRow = document.getElementById('hintRow');
   hintRow.innerHTML = '';
@@ -1477,6 +1519,7 @@ function finishSession(){
         btnGroup.className = 'wi-btns';
         btnGroup.appendChild(makeSpeakBtn(item.w));
         btnGroup.appendChild(starBtn);
+        btnGroup.appendChild(makeHardBtn(item.s));
         correctRow.appendChild(correctEl);
         correctRow.appendChild(btnGroup);
 
@@ -1542,6 +1585,12 @@ document.getElementById('starBtn').addEventListener('click', async () => {
   starBtn.textContent = isStarred(item.s) ? '★' : '☆';
   starBtn.classList.toggle('active', isStarred(item.s));
 });
+document.getElementById('hardBtn').addEventListener('click', async () => {
+  const item = sessionQueue[sessionIdx];
+  if(!item) return;
+  await toggleHard(item.s);
+  setHardIcon(document.getElementById('hardBtn'), isHard(item.s));
+});
 document.getElementById('manualSaveBtn').addEventListener('click', async () => {
   const btn = document.getElementById('manualSaveBtn');
   const originalLabel = btn.textContent;
@@ -1592,7 +1641,11 @@ document.getElementById('menuResetBtn').addEventListener('click', () => {
 });
 document.getElementById('menuStarredBtn').addEventListener('click', () => {
   document.getElementById('menuModal').classList.add('hidden');
-  openStarredWeekModal();
+  openStarredWeekModal('star');
+});
+document.getElementById('menuHardBtn').addEventListener('click', () => {
+  document.getElementById('menuModal').classList.add('hidden');
+  openStarredWeekModal('hard');
 });
 document.getElementById('menuTestBtn').addEventListener('click', () => {
   document.getElementById('menuModal').classList.add('hidden');
@@ -1678,6 +1731,7 @@ function renderHistory(){
         btnGroup.className = 'wi-btns';
         btnGroup.appendChild(makeSpeakBtn(item.w));
         btnGroup.appendChild(starBtn);
+        btnGroup.appendChild(makeHardBtn(item.s));
         correctRow.appendChild(correctEl);
         correctRow.appendChild(btnGroup);
 
@@ -1763,10 +1817,11 @@ function renderFlashcard(){
   const starBtn = document.getElementById('flashcardStarBtn');
   starBtn.textContent = isStarred(item.s) ? '★' : '☆';
   starBtn.classList.toggle('active', isStarred(item.s));
+  setHardIcon(document.getElementById('flashcardHardBtn'), isHard(item.s));
 }
 
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if(e.target.closest('#flashcardStarBtn') || e.target.closest('#fcSpeakBtn')) return;
+  if(e.target.closest('#flashcardStarBtn') || e.target.closest('#flashcardHardBtn') || e.target.closest('#fcSpeakBtn')) return;
   if(!flashcardFlipped){
     flashcardFlipped = true;
   } else {
@@ -1783,6 +1838,14 @@ document.getElementById('flashcardStarBtn').addEventListener('click', async (e) 
   const starBtn = document.getElementById('flashcardStarBtn');
   starBtn.textContent = isStarred(item.s) ? '★' : '☆';
   starBtn.classList.toggle('active', isStarred(item.s));
+});
+
+document.getElementById('flashcardHardBtn').addEventListener('click', async (e) => {
+  e.stopPropagation();
+  const item = flashcardList[flashcardIdx];
+  if(!item) return;
+  await toggleHard(item.s);
+  setHardIcon(document.getElementById('flashcardHardBtn'), isHard(item.s));
 });
 
 document.getElementById('fcSpeakBtn').addEventListener('click', (e) => {
@@ -1894,6 +1957,7 @@ function showWordBankWeek(idx){
     row.appendChild(meaningEl);
     row.appendChild(speakBtn);
     row.appendChild(starBtn);
+    row.appendChild(makeHardBtn(v.s));
     div.appendChild(row);
     listEl.appendChild(div);
   });
@@ -2030,15 +2094,18 @@ document.getElementById('testSelectCloseBtn').addEventListener('click', () => {
 document.getElementById('testSelectBackBtn').addEventListener('click', () => backToMenu('testSelectModal'));
 
 // ---------- STARRED WORDS ----------
-function openStarredWeekModal(){
+let starredKind = 'star';
+function openStarredWeekModal(kind){
+  starredKind = kind === 'hard' ? 'hard' : 'star';
+  const has = starredKind === 'hard' ? isHard : isStarred;
   const list = document.getElementById('starredWeekList');
   list.innerHTML = '';
   WEEKS.forEach((week, idx) => {
     const start = week[0].s, end = week[week.length-1].s;
-    const count = week.filter(v => isStarred(v.s)).length;
+    const count = week.filter(v => has(v.s)).length;
     const btn = document.createElement('button');
     btn.className = 'test-item';
-    btn.innerHTML = `<div class="ti-title">第 ${idx+1} 週（${start}–${end}）</div><div class="ti-sub">${count} 個收藏單字</div>`;
+    btn.innerHTML = `<div class="ti-title">第 ${idx+1} 週（${start}–${end}）</div><div class="ti-sub">${count} 個${starredKind === 'hard' ? '超難單字' : '收藏單字'}</div>`;
     btn.addEventListener('click', () => {
       document.getElementById('starredWeekModal').classList.add('hidden');
       showStarredWeek(idx);
@@ -2056,8 +2123,9 @@ let pendingUnstar = new Set();
 
 function showStarredWeek(idx){
   const week = WEEKS[idx];
-  const starredItems = week.filter(v => isStarred(v.s));
-  document.getElementById('starredWeekLabel').textContent = '第 ' + (idx+1) + ' 週收藏';
+  const isHardKind = starredKind === 'hard';
+  const starredItems = week.filter(v => isHardKind ? isHard(v.s) : isStarred(v.s));
+  document.getElementById('starredWeekLabel').textContent = '第 ' + (idx+1) + (isHardKind ? ' 週超難單字' : ' 週收藏');
 
   pendingUnstar = new Set();
 
@@ -2067,7 +2135,7 @@ function showStarredWeek(idx){
   if(starredItems.length === 0){
     const p = document.createElement('div');
     p.className = 'empty-note';
-    p.textContent = '尚未收藏單字';
+    p.textContent = isHardKind ? '尚未標記超難單字' : '尚未收藏單字';
     wrap.appendChild(p);
     showScreen('starred');
     return;
@@ -2094,17 +2162,16 @@ function showStarredWeek(idx){
     meaningEl.textContent = v.c;
 
     const removeBtn = document.createElement('button');
-    removeBtn.className = 'star-remove-btn';
-    removeBtn.textContent = '★';
+    removeBtn.className = isHardKind ? 'hard-mini' : 'star-remove-btn';
+    if(isHardKind) setHardIcon(removeBtn, true); else removeBtn.textContent = '★';
     removeBtn.addEventListener('click', () => {
-      if(pendingUnstar.has(v.s)){
-        pendingUnstar.delete(v.s);
-        removeBtn.textContent = '★';
-        removeBtn.classList.remove('inactive');
+      const removing = !pendingUnstar.has(v.s);
+      if(removing) pendingUnstar.add(v.s); else pendingUnstar.delete(v.s);
+      if(isHardKind){
+        setHardIcon(removeBtn, !removing);
       } else {
-        pendingUnstar.add(v.s);
-        removeBtn.textContent = '☆';
-        removeBtn.classList.add('inactive');
+        removeBtn.textContent = removing ? '☆' : '★';
+        removeBtn.classList.toggle('inactive', removing);
       }
     });
 
@@ -2122,7 +2189,8 @@ function showStarredWeek(idx){
 document.getElementById('starredBackBtn').addEventListener('click', async () => {
   if(pendingUnstar.size > 0){
     pendingUnstar.forEach(seq => {
-      if(progress.starred) delete progress.starred[seq];
+      const store = starredKind === 'hard' ? progress.hard : progress.starred;
+      if(store) delete store[seq];
     });
     await doSave();
     pendingUnstar.clear();
@@ -2281,7 +2349,7 @@ document.getElementById('importFile').addEventListener('change', (e) => {
         alert('這個檔案格式看起來不正確，無法匯入。');
         return;
       }
-      progress = { words: p.words || {}, days: Array.isArray(p.days) ? p.days : [], starred: p.starred || {}, searchHistory: Array.isArray(p.searchHistory) ? p.searchHistory : [], testHistory: Array.isArray(p.testHistory) ? p.testHistory : [] };
+      progress = { words: p.words || {}, days: Array.isArray(p.days) ? p.days : [], starred: p.starred || {}, hard: p.hard || {}, searchHistory: Array.isArray(p.searchHistory) ? p.searchHistory : [], testHistory: Array.isArray(p.testHistory) ? p.testHistory : [] };
       await doSave();
       showScreen('home');
       alert('匯入成功！');
